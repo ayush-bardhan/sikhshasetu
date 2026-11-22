@@ -1,0 +1,783 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="ShikshaSetu student success and mentor support dashboard">
+  <meta name="theme-color" content="#08140b">
+  <title>ShikshaSetu — Student Success</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    (() => {
+      try {
+        const saved = localStorage.getItem("shikshasetu-theme");
+        if (saved === "dark" || saved === "light") {
+          document.documentElement.setAttribute("data-theme", saved);
+        }
+      } catch (_) {}
+    })();
+  </script>
+  <script src="theme-controller.js"></script>
+  <script>
+    (() => {
+      try {
+        const profile = JSON.parse(localStorage.getItem("shikshasetu-account-profile-v1") || "null");
+        const session = JSON.parse(sessionStorage.getItem("shikshasetu-auth-session-v1") || "null");
+        if (!profile?.email || !session?.email || String(profile.email).toLowerCase() !== String(session.email).toLowerCase()) {
+          window.location.replace("index.html");
+        }
+      } catch (_) { window.location.replace("index.html"); }
+    })();
+  </script>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="moss-box-theme-142.css?v=142-2">
+  <link rel="stylesheet" href="reference-image-theme.css?v=2026-11-05-light-polish-2">
+</head>
+<body>
+  <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div><div class="ambient ambient-c"></div>
+  <div class="app-shell">
+    <aside class="sidebar glass" id="sidebar">
+      <a class="brand" href="#" aria-label="ShikshaSetu home">
+        <span class="brand-mark"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M25.8 5.2C15.1 5.2 7.2 9 6.1 17.1c-.6 4.4 2.5 7.2 6.6 6.4 8-1.5 12.2-8.6 13.1-18.3Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M7.2 26.4c3.1-5.7 7.8-9.9 14.9-14.6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+        <span><strong>ShikshaSetu</strong><small>STUDENT SUCCESS</small></span>
+      </a>
+      <div class="workspace-label">WORKSPACE</div>
+      <nav class="nav-list" aria-label="Main navigation">
+        <button class="nav-item active" data-page="overview"><span class="nav-icon">◫</span><span>Dashboard</span></button>
+        <button class="nav-item" data-page="dashboard"><span class="nav-icon">▦</span><span>Analytics</span></button>
+        <button class="nav-item" data-page="students"><span class="nav-icon">♙</span><span>Students</span><span class="nav-count" id="studentNavCount">0</span></button>
+        <button class="nav-item" data-page="interventions"><span class="nav-icon">✳</span><span>Interventions</span></button>
+        <button class="nav-item" data-page="support"><span class="nav-icon">⟳</span><span>AI Support Engine</span></button>
+        <button class="nav-item" data-page="ai-admin"><span class="nav-icon">✦</span><span>AI Admin</span></button>
+        <button class="nav-item" data-page="mentors"><span class="nav-icon">☷</span><span>Mentor Workspace</span></button>
+        <button class="nav-item" data-page="fairness"><span class="nav-icon">◈</span><span>Fairness Audit</span></button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="help-card">
+          <span class="help-icon">✦</span><strong>Every student can grow.</strong>
+          <p>Use insights to start supportive conversations, not to define a student.</p>
+        </div>
+        <button class="nav-item" id="settingsButton"><span class="nav-icon">⚙</span><span>Appearance</span></button>
+        <div class="profile-mini"><div class="avatar">AI</div><div><strong>AI system workspace</strong><small>Decision support · Prototype</small></div><span class="online-dot"></span></div>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar ss-topbar">
+        <button class="icon-button mobile-menu" id="menuButton" aria-label="Open navigation">☰</button>
+        <div class="crumb ss-topbar-welcome">
+          <div class="ss-welcome-copy">
+            <h1>Welcome back, <span id="headerGreetingName">Aditya</span></h1>
+            <p>A data and AI driven platform for student support and wellbeing</p>
+          </div>
+          <strong id="crumbCurrent" class="sr-only">Overview</strong>
+        </div>
+        <div class="top-actions ss-top-actions">
+          <button class="ss-global-search" type="button" data-go="students" aria-label="Search students and interventions">
+            <span class="ss-search-symbol" aria-hidden="true">⌕</span>
+            <span>Search students, interventions…</span>
+          </button>
+          <span class="ss-notification-button" aria-label="Notifications" role="img"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><i></i></span>
+          <div class="api-status ss-api-status" id="apiStatus" aria-label="Backend connection status"><i></i><span>Connecting…</span></div>
+          <div class="model-status" id="aiAdminStatus" hidden><span>✦</span><b>AI Admin</b><small>Prototype</small></div>
+          <div class="model-status" id="modelStatus" hidden><span>✦</span><b>AI Support Engine</b><small>Prototype</small></div>
+          <button class="icon-button ss-theme-button" id="themeToggle" aria-label="Toggle light and dark mode" title="Toggle theme">☼</button>
+          <button class="secondary-button compact ss-avatar-button account-setup-trigger" id="accountSetupButton" type="button" aria-label="Open profile">AJ</button>
+          <button class="primary-button compact ss-add-button" id="addStudentTop">＋ Add student</button>
+        </div>
+      </header>
+
+      <div class="page-wrap">
+        <section class="page" id="page-dashboard">
+          <div class="edash-heading">
+            <div>
+              <div class="eyebrow"><span class="eyebrow-dot"></span> SHIKSHASETU · LIVE WORKSPACE</div>
+              <h1>Student success, in focus<span class="edash-title-spark">✦</span></h1>
+              <p class="page-subtitle">A clear, balanced view of student progress, support priorities and the actions moving forward.</p>
+            </div>
+            <div class="edash-heading-meta">
+              <span class="edash-date" id="edashDate">Today</span>
+              <span class="edash-live"><i></i> Workspace overview</span>
+            </div>
+          </div>
+
+          <section class="edash-hero glass">
+            <div class="edash-hero-content">
+              <span class="edash-hero-kicker">THE SHIKSHASETU PICTURE</span>
+              <h2>Turn every early signal<br><em>into thoughtful support.</em></h2>
+              <p>Bring student records, mentor actions and explainable indicators into one calm workspace. Review the context before choosing the next step.</p>
+              <div class="edash-hero-actions">
+                <button class="hero-button" type="button" data-go="students">Explore students <span>→</span></button>
+                <button class="edash-glass-button" type="button" data-go="support">Open support loop <span>↗</span></button>
+              </div>
+            </div>
+            <div class="edash-hero-art" aria-hidden="true">
+              <div class="edash-orbit edash-orbit-a"></div>
+              <div class="edash-orbit edash-orbit-b"></div>
+              <div class="edash-hero-leaf">✦</div>
+              <div class="edash-glass-orb"><span>✧</span></div>
+              <div class="edash-hero-note"><small>Progress is personal</small><b>One step at a time</b></div>
+            </div>
+          </section>
+
+          <div class="edash-section-head">
+            <div><h2>At a glance</h2><p>Current records and latest available assessment snapshots</p></div>
+            <span class="edash-updated" id="edashUpdated">Updating from workspace…</span>
+          </div>
+
+          <section class="edash-kpi-grid" aria-label="Workspace metrics">
+            <article class="edash-kpi glass">
+              <div class="edash-kpi-top"><span class="edash-kpi-icon kpi-leaf">♙</span><span class="edash-kpi-caption">WORKSPACE</span></div>
+              <small>Total students</small><strong id="edashTotal">—</strong><p>Student records available</p>
+            </article>
+            <article class="edash-kpi glass">
+              <div class="edash-kpi-top"><span class="edash-kpi-icon kpi-sky">◷</span><span class="edash-kpi-caption">COVERAGE</span></div>
+              <small>Assessed students</small><strong id="edashAssessed">—</strong><p>With a latest assessment</p>
+            </article>
+            <article class="edash-kpi glass">
+              <div class="edash-kpi-top"><span class="edash-kpi-icon kpi-amber">◎</span><span class="edash-kpi-caption">REVIEW</span></div>
+              <small>Higher support</small><strong id="edashHigh">—</strong><p>Needs contextual check-in</p>
+            </article>
+            <article class="edash-kpi glass">
+              <div class="edash-kpi-top"><span class="edash-kpi-icon kpi-mint">⌁</span><span class="edash-kpi-caption">AVERAGE</span></div>
+              <small>Attendance</small><strong id="edashAttendance">—</strong><p>Across current records</p>
+            </article>
+          </section>
+
+          <div class="edash-content-grid">
+            <section class="edash-panel glass">
+              <div class="edash-panel-head">
+                <div><span class="edash-overline">ASSESSMENT SNAPSHOTS</span><h3>Student support distribution</h3><p>Latest recorded risk bands, not permanent labels.</p></div>
+                <span class="edash-panel-mark">◌</span>
+              </div>
+              <div id="edashRiskDistribution" class="edash-risk-distribution">
+                <div class="empty-state">Assessment distribution will appear when records are loaded.</div>
+              </div>
+              <div class="edash-panel-footer"><span>Responsible review</span><button type="button" data-go="fairness">Open fairness audit →</button></div>
+            </section>
+
+            <section class="edash-panel glass">
+              <div class="edash-panel-head">
+                <div><span class="edash-overline">AI-ASSISTED REVIEW</span><h3>Signals worth understanding</h3><p>Rule-based prompts from fields currently available.</p></div>
+                <span class="edash-ai-tag"><i></i> Prototype</span>
+              </div>
+              <div id="edashInsightList" class="edash-insight-list">
+                <div class="empty-state">Review prompts will appear when student records are loaded.</div>
+              </div>
+              <div class="edash-panel-footer"><span>Context before conclusion</span><button type="button" data-go="ai-admin">Open AI Admin →</button></div>
+            </section>
+          </div>
+
+          <div class="edash-content-grid edash-lower-grid">
+            <section class="edash-panel glass">
+              <div class="edash-panel-head">
+                <div><span class="edash-overline">LEARNING PULSE</span><h3>Workspace averages</h3><p>Aggregate academic indicators from current student records.</p></div>
+                <span class="edash-panel-mark">⌁</span>
+              </div>
+              <div id="edashLearningPulse" class="edash-learning-pulse">
+                <div class="empty-state">Learning indicators will appear here.</div>
+              </div>
+              <p class="edash-caveat">Averages describe the current workspace only. They do not describe an individual student's needs.</p>
+            </section>
+
+            <section class="edash-panel glass">
+              <div class="edash-panel-head">
+                <div><span class="edash-overline">NEXT CONVERSATIONS</span><h3>Students to review</h3><p>Students with current signals or the highest available assessment values.</p></div>
+                <span class="edash-panel-mark">✧</span>
+              </div>
+              <div id="edashPriorityList" class="edash-priority-list">
+                <div class="empty-state">No student records are loaded.</div>
+              </div>
+              <div class="edash-panel-footer"><span>Mentor-led support</span><button type="button" data-go="students">View directory →</button></div>
+            </section>
+          </div>
+
+          <section class="edash-quick-strip glass">
+            <div><span class="edash-overline">KEEP THE LOOP MOVING</span><b>Choose the next useful action.</b><small>Every action should be reviewed with the student and mentor.</small></div>
+            <button type="button" data-go="students"><span>♙</span> Student records <i>→</i></button>
+            <button type="button" data-go="support"><span>⟳</span> Mentor support <i>→</i></button>
+            <button type="button" data-go="mentors"><span>☷</span> Log feedback <i>→</i></button>
+          </section>
+        </section>
+
+        <section class="page active ss-overview-page" id="page-overview">
+          <div class="ss-overview-intro">
+            <div>
+              <div class="eyebrow"><span class="eyebrow-dot"></span> SHIKSHASETU · STUDENT SUCCESS</div>
+              <h2>Student support at a glance</h2>
+              <p class="page-subtitle">Understand the latest signals, then decide the next supportive step with the student.</p>
+            </div>
+            <div class="date-chip" id="todayDate"></div>
+          </div>
+
+          <div class="stats-grid ss-reference-stats" aria-label="Student support metrics">
+            <article class="stat-card glass ss-stat-total"><div class="stat-top"><span>Total Students</span><span class="stat-icon green">♙</span></div><strong id="statTotal">—</strong><small>Student records in this workspace</small></article>
+            <article class="stat-card glass ss-stat-risk"><div class="stat-top"><span>At Risk</span><span class="stat-icon amber">△</span></div><strong id="statHigh">—</strong><small>Higher support estimate · review in context</small></article>
+            <article class="stat-card glass ss-stat-watch"><div class="stat-top"><span>Watch List</span><span class="stat-icon blue">◷</span></div><strong id="statMedium">—</strong><small>May benefit from a check-in</small></article>
+            <article class="stat-card glass ss-stat-ontrack"><div class="stat-top"><span>On Track</span><span class="stat-icon green">♡</span></div><strong id="statLow">—</strong><small>Continue positive momentum</small></article>
+          </div>
+
+          <div class="ss-overview-content">
+            <section class="panel glass recent-panel ss-recent-panel">
+              <div class="panel-heading ss-reference-panel-heading">
+                <div><span class="ss-panel-kicker">LATEST STUDENT ACTIVITY</span><h3>Recent Students</h3><p>Students with a latest assessment, ordered by support priority.</p></div>
+                <button class="text-button" data-go="students">View all <span>→</span></button>
+              </div>
+              <div class="table-wrap ss-reference-table-wrap">
+                <table>
+                  <thead><tr><th>STUDENT</th><th>ATTENDANCE</th><th>RISK</th><th>LAST ACTIVITY</th><th>ACTION</th></tr></thead>
+                  <tbody id="overviewStudents"><tr><td colspan="5" class="empty-cell">Loading student records…</td></tr></tbody>
+                </table>
+              </div>
+              <div class="ss-table-footnote">Risk estimates are time-bound screening signals, not permanent labels or diagnoses.</div>
+            </section>
+
+            <aside class="panel glass ss-insights-panel" aria-labelledby="ssInsightsTitle">
+              <div class="panel-heading ss-insights-heading"><div><span class="ss-panel-kicker">SUPPORT GUIDANCE</span><h3 id="ssInsightsTitle">AI Insights</h3></div><span class="ss-insights-mark" aria-hidden="true">✧</span></div>
+              <div class="ss-insight-list">
+                <div class="ss-insight-item"><i class="ss-insight-dot risk"></i><div><b>Review higher support estimates</b><p>Open the student record and check the factors behind the latest estimate.</p></div></div>
+                <div class="ss-insight-item"><i class="ss-insight-dot positive"></i><div><b>Agree practical next steps</b><p>Choose interventions with the student and keep mentor approval central.</p></div></div>
+                <div class="ss-insight-item"><i class="ss-insight-dot positive"></i><div><b>Keep follow-ups visible</b><p>Record mentor feedback and compare later assessment snapshots.</p></div></div>
+              </div>
+              <div class="ss-insights-actions">
+                <button class="secondary-button" type="button" data-go="support">Open AI Support Engine <span>→</span></button>
+                <button class="text-button" type="button" data-go="fairness">Review fairness audit</button>
+              </div>
+            </aside>
+          </div>
+
+          <div class="dashboard-grid ss-secondary-dashboard">
+            <section class="panel glass chart-panel"><div class="panel-heading"><div><span class="ss-panel-kicker">ASSESSMENT SNAPSHOTS</span><h3>Student support distribution</h3><p>Distribution of latest risk assessments.</p></div><span class="soft-pill">Latest snapshot</span></div><div class="chart-wrap"><canvas id="riskChart" height="170" aria-label="Risk band distribution chart"></canvas><div class="chart-legend"><span><i class="legend-dot high"></i>Higher support</span><span><i class="legend-dot medium"></i>Watch list</span><span><i class="legend-dot low"></i>On track</span></div></div></section>
+            <section class="panel glass action-panel"><div class="panel-heading"><div><span class="ss-panel-kicker">WORKSPACE ACTIONS</span><h3>Keep support moving</h3><p>Choose a useful next step.</p></div><span class="sparkle">✧</span></div><button class="quick-action" id="quickAdd"><span class="quick-icon qi-green">＋</span><span><b>Add a student</b><small>Create a student record</small></span><i>→</i></button><button class="quick-action" data-go="interventions"><span class="quick-icon qi-green">✳</span><span><b>Explore interventions</b><small>Find a practical next step</small></span><i>→</i></button><button class="quick-action" data-go="mentors"><span class="quick-icon qi-green">☷</span><span><b>Open mentor workspace</b><small>Record a check-in or follow-up</small></span><i>→</i></button></section>
+          </div>
+          <div class="notice ss-responsible-note"><span>ⓘ</span><p><b>Responsible use</b> Always consider student context and speak with the student before deciding on support. AI outputs are decision-support prompts, not automated decisions.</p></div>
+        </section>
+
+
+        <section class="page" id="page-support">
+          <div class="support-heading-row">
+            <div>
+              <div class="eyebrow">AI-ORCHESTRATED · EXPLAINABLE · STUDENT-CENTRED</div>
+              <h1>AI Mentor Support Loop</h1>
+              <p class="page-subtitle">The support engine automatically checks the available student data, explains its signals and drafts a personalized support plan. Human contact and intervention approval remain deliberate steps.</p>
+            </div>
+            <span class="support-engine-chip"><i></i> AI Support Engine · Prototype</span>
+          </div>
+
+          <section class="support-process glass" aria-label="Mentor support process">
+            <div class="support-process-step active"><span>01</span><b>AI identifies</b><small>Checks available data</small></div>
+            <i>→</i>
+            <div class="support-process-step"><span>02</span><b>AI explains</b><small>Shows contributors</small></div>
+            <i>→</i>
+            <div class="support-process-step"><span>03</span><b>AI recommends</b><small>Drafts support plan</small></div>
+            <i>→</i>
+            <div class="support-process-step"><span>04</span><b>Mentor approves</b><small>Confirms next action</small></div>
+            <i>→</i>
+            <div class="support-process-step"><span>05</span><b>AI tracks</b><small>Compares new evidence</small></div>
+          </section>
+
+          <div class="notice support-ai-notice">
+            <span>✦</span>
+            <p id="supportAiNoticeCopy"><b>The AI Support Engine coordinates assessment and support drafting.</b> The active engine is shown here from the connected backend. A mentor must review and approve any student contact or intervention; the system never invents missing data or treats correlation as cause.</p>
+          </div>
+
+          <section class="support-auto-run-panel glass" aria-label="Automatic AI support cycle">
+            <div class="support-auto-run-copy">
+              <span class="support-auto-run-orb">✦</span>
+              <div><div class="support-auto-run-kicker">AUTOMATED WORKFLOW</div><h3>Let the AI Mentor run the support cycle</h3><p>Select a student and the engine can run the assessment, prepare the explanation, prioritize intervention ideas and draft a weekly target in one coordinated pass.</p></div>
+            </div>
+            <div class="support-auto-run-actions">
+              <label class="support-auto-toggle"><input type="checkbox" id="supportAutoRunEnabled" checked><span class="support-auto-switch"></span><span>Auto-run when a student is selected</span></label>
+              <button class="primary-button" id="supportRunAiCycle" type="button">Run complete AI cycle <span>✦</span></button>
+            </div>
+            <div class="support-auto-run-status" id="supportAiCycleStatus" role="status" aria-live="polite"><i></i><span>Select a student to begin the automated review.</span></div>
+          </section>
+
+          <div class="support-dashboard-grid">
+            <section class="panel glass support-card">
+              <div class="panel-heading">
+                <div><h3>01 · Automatic early detection</h3><p>The engine checks the selected student's currently available academic indicators.</p></div>
+                <span class="support-icon">⌕</span>
+              </div>
+              <label class="field-label">Student record
+                <select id="supportStudentSelect"><option value="">Choose a student</option></select>
+              </label>
+              <div id="supportStudentSnapshot" class="support-stats">
+                <div class="empty-state">Choose a student to see their academic snapshot.</div>
+              </div>
+              <div class="support-actions-row">
+                <button class="primary-button" id="supportRunAssessment" type="button" disabled>Run / refresh assessment ↗</button>
+                <small id="supportAssessmentHint" class="support-muted">Select a student to begin.</small>
+              </div>
+            </section>
+
+            <section class="panel glass support-card">
+              <div class="panel-heading">
+                <div><h3>Early-warning signals</h3><p>Signals are prompts for a supportive conversation, not proof of cause.</p></div>
+                <span class="support-icon">◉</span>
+              </div>
+              <div id="supportEarlySignals" class="support-signal-list">
+                <div class="empty-state">Select a student to view early-warning indicators.</div>
+              </div>
+              <p class="support-data-caveat"><b>Data needed for stronger detection:</b> dated subject marks, an attendance calendar and subject-level result history. Enter available dated snapshots below; missing history will not be guessed.</p>
+            </section>
+          </div>
+
+          <div class="support-dashboard-grid support-dashboard-grid-equal">
+            <section class="panel glass support-card">
+              <div class="panel-heading">
+                <div><h3>Academic trend monitoring</h3><p>Record the previous and latest subject or attendance values.</p></div>
+                <span class="support-icon">↗</span>
+              </div>
+              <form id="supportTrendForm" class="support-form">
+                <div class="support-form-grid">
+                  <label class="field-label">Subject<input id="supportTrendSubject" maxlength="80" placeholder="e.g. Mathematics" required></label>
+                  <label class="field-label">Previous result date<input id="supportTrendPreviousDate" type="date" required></label>
+                  <label class="field-label">Latest result date<input id="supportTrendLatestDate" type="date" required></label>
+                  <label class="field-label">Previous mark (%)<input id="supportTrendPreviousMark" type="number" min="0" max="100" step="0.1" placeholder="Previous result" required></label>
+                  <label class="field-label">Latest mark (%)<input id="supportTrendLatestMark" type="number" min="0" max="100" step="0.1" placeholder="Latest result" required></label>
+                  <label class="field-label">Previous attendance (%)<input id="supportTrendPreviousAttendance" type="number" min="0" max="100" step="0.1" placeholder="Optional" ></label>
+                  <label class="field-label">Consecutive absences<input id="supportTrendAbsences" type="number" min="0" max="90" step="1" value="0"></label>
+                  <label class="field-label">Repeated subject failures<input id="supportTrendFailures" type="number" min="0" max="20" step="1" value="0"></label>
+                </div>
+                <button class="secondary-button" type="submit">Save dated trend snapshot</button>
+                <small class="support-muted">Connected records are stored as dated academic history and may be used as model inputs. Dates must reflect the actual assessment periods.</small>
+              </form>
+            </section>
+
+            <section class="panel glass support-card">
+              <div class="panel-heading">
+                <div><h3>Trend signals & history</h3><p>Review recorded changes with the student.</p></div>
+                <span class="soft-pill" id="supportTrendBadge">No trend data</span>
+              </div>
+              <div id="supportTrendSignals" class="support-trend-results"><div class="empty-state">No dated trend snapshot yet.</div></div>
+              <div id="supportTrendHistory" class="support-trend-history"></div>
+            </section>
+          </div>
+
+          <div class="support-dashboard-grid support-dashboard-grid-equal">
+            <section class="panel glass support-card">
+              <div class="panel-heading">
+                <div><h3>02 · AI explanation</h3><p>Review the feature contributors generated from the available assessment.</p></div>
+                <span class="soft-pill" id="supportRiskBand">Not assessed</span>
+              </div>
+              <div id="supportRiskExplanation" class="support-explanation">
+                <div class="empty-state">Run an assessment to see its feature-level explanation.</div>
+              </div>
+            </section>
+
+            <section class="panel glass support-card">
+              <div class="panel-heading">
+                <div><h3>Learning-gap profile</h3><p>Potential learning needs based only on the data supplied.</p></div>
+                <span class="support-icon">⌕</span>
+              </div>
+              <div id="supportLearningGaps" class="support-learning-gaps">
+                <div class="empty-state">Choose a student to build a learning-gap profile.</div>
+              </div>
+            </section>
+          </div>
+
+          <div class="support-dashboard-grid support-dashboard-grid-equal">
+            <section class="panel glass support-card">
+              <div class="panel-heading">
+                <div><h3>03 · AI-personalized support draft</h3><p>The engine prioritizes suitable options and prepares a plan for mentor approval.</p></div>
+                <span class="support-icon">✧</span>
+              </div>
+              <div id="supportRecommendations" class="support-recommendations">
+                <div class="empty-state">Choose a student to see support suggestions.</div>
+              </div>
+              <div id="supportSelectedRecommendation" class="support-selected-note">No support option selected.</div>
+              <h4 class="support-subheading">Recommended learning resources</h4>
+              <div id="supportLearningResources" class="support-learning-resources">
+                <div class="empty-state">Resource ideas will appear here.</div>
+              </div>
+            </section>
+
+            <section class="panel glass support-card">
+              <div class="panel-heading">
+                <div><h3>Personalized weekly targets</h3><p>Turn a broad improvement plan into small, reviewable actions.</p></div>
+                <span class="support-icon">✓</span>
+              </div>
+              <div id="supportWeeklyTargets" class="support-weekly-targets">
+                <div class="empty-state">Select a student to prepare weekly targets.</div>
+              </div>
+              <p class="support-data-caveat">Targets are suggestions, not automated instructions. Agree on a realistic plan with the student.</p>
+            </section>
+          </div>
+
+          <div class="support-dashboard-grid support-dashboard-grid-equal">
+            <section class="panel glass support-card">
+              <div class="panel-heading">
+                <div><h3>04 · Record action & mentor notes</h3><p>Capture context, strengths, barriers and the support agreed.</p></div>
+                <span class="support-icon">✎</span>
+              </div>
+              <form id="supportMentorActionForm" class="support-form">
+                <label class="field-label">Mentor name<input id="supportMentorName" required placeholder="Your name"></label>
+                <label class="field-label">Conversation summary<textarea id="supportMentorObservation" rows="3" required placeholder="Student perspective, strengths, barriers or context…"></textarea></label>
+                <label class="field-label">Support / action agreed<textarea id="supportMentorAction" rows="2" required placeholder="Selected support and the practical next step…"></textarea></label>
+                <label class="field-label">Personalized weekly target<input id="supportMentorWeeklyTarget" maxlength="180" placeholder="e.g. Two 20-minute practice sessions"></label>
+                <label class="field-label">Follow-up date<input id="supportMentorFollowupDate" type="date" required></label>
+                <button class="primary-button full-width" type="submit">Record action & schedule follow-up →</button>
+                <small class="support-muted">Mentor actions and follow-up status sync with Spring Boot when connected. In demo mode, they remain local to this browser.</small>
+              </form>
+            </section>
+
+            <section class="panel glass support-card">
+              <div class="panel-heading">
+                <div><h3>05 · Follow up & compare risk change</h3><p>Record the outcome and review successive assessment snapshots.</p></div>
+                <span class="support-icon">↗</span>
+              </div>
+              <div id="supportFollowupList" class="support-followup-list"><div class="empty-state">No follow-ups recorded yet.</div></div>
+              <form id="supportFollowupOutcomeForm" class="support-form support-outcome-form">
+                <label class="field-label">Follow-up to update<select id="supportFollowupSelect"><option value="">Choose a follow-up</option></select></label>
+                <label class="field-label">Outcome<select id="supportFollowupOutcome">
+                  <option value="Completed · improvement noted">Completed · improvement noted</option>
+                  <option value="Completed · no clear change yet">Completed · no clear change yet</option>
+                  <option value="Further support needed">Further support needed</option>
+                  <option value="Student not reached">Student not reached</option>
+                </select></label>
+                <label class="field-label">Outcome note<textarea id="supportFollowupOutcomeNote" rows="2" placeholder="What changed? What still needs support?"></textarea></label>
+                <button class="secondary-button" type="submit">Record follow-up outcome</button>
+              </form>
+              <div class="support-risk-compare" id="supportRiskCompare"><div class="empty-state">Two assessments are needed to compare changes over time.</div></div>
+            </section>
+          </div>
+
+          <section class="panel glass support-wellbeing-panel">
+            <div class="panel-heading">
+              <div><h3>Mental & emotional wellbeing support</h3><p>Voluntary student check-ins, trusted-person contact and clear human-help guidance.</p></div>
+              <span class="support-icon">♡</span>
+            </div>
+            <div class="support-wellbeing-grid">
+              <section class="support-wellbeing-block">
+                <h4>Mood pattern tracker</h4>
+                <p class="support-muted">Students can voluntarily record how they feel. Mood is not used to calculate academic risk.</p>
+                <form id="supportMoodForm" class="support-form">
+                  <div class="support-mood-options" role="radiogroup" aria-label="Select how you feel today">
+                    <label><input type="radio" name="supportMood" value="1" required><span>😟</span><small>Low</small></label>
+                    <label><input type="radio" name="supportMood" value="2"><span>😕</span><small>Unsettled</small></label>
+                    <label><input type="radio" name="supportMood" value="3"><span>😐</span><small>Okay</small></label>
+                    <label><input type="radio" name="supportMood" value="4"><span>🙂</span><small>Good</small></label>
+                    <label><input type="radio" name="supportMood" value="5"><span>😊</span><small>Great</small></label>
+                  </div>
+                  <label class="field-label">Optional note<textarea id="supportMoodNote" rows="2" maxlength="240" placeholder="Add a private note for yourself…"></textarea></label>
+                  <button class="secondary-button" type="submit">Save voluntary check-in</button>
+                </form>
+                <div id="supportMoodPattern" class="support-mood-pattern">Mood entries stay in this browser preview.</div>
+                <div id="supportMoodHistory" class="support-mood-history"></div>
+              </section>
+
+              <section class="support-wellbeing-block">
+                <h4>Phone-a-friend · Trusted contact</h4>
+                <p class="support-muted">Save a contact for this browser session. The call starts only when the student presses the button.</p>
+                <form id="supportTrustedContactForm" class="support-form">
+                  <label class="field-label">Trusted person's name<input id="supportTrustedName" maxlength="80" placeholder="Friend, family member or trusted person" required></label>
+                  <label class="field-label">Phone number<input id="supportTrustedPhone" type="tel" maxlength="24" placeholder="Include country code if needed" required></label>
+                  <button class="secondary-button" type="submit">Call trusted contact ☎</button>
+                </form>
+              </section>
+
+              <section class="support-wellbeing-block support-human-help">
+                <h4>Human escalation system</h4>
+                <p>If a student raises an urgent safety concern, the platform should connect them with a trained human responder. This frontend prototype cannot send an alert or guarantee a responder is available.</p>
+                <button class="primary-button" id="supportHumanHelpButton" type="button">Show human-help guidance</button>
+                <div id="supportHumanHelpGuidance" class="support-human-guidance" aria-live="polite"></div>
+              </section>
+            </div>
+            <div class="support-privacy-note"><b>Privacy and safety:</b> mood notes and trusted-contact details are kept locally in this browser prototype and are not sent to the backend. This is not a diagnosis or emergency service. If someone is in immediate danger, contact local emergency services or a trusted trained professional directly.</div>
+          </section>
+        </section>
+
+        <section class="page" id="page-students">
+          <div class="page-title-row"><div><div class="eyebrow">PEOPLE &amp; PROGRESS</div><h1>Students</h1><p class="page-subtitle">Get to know each student's progress and what might help next.</p></div><button class="primary-button" id="addStudentButton">＋ Add student</button></div>
+          <section class="panel glass filters-panel"><div class="search-field"><span>⌕</span><input id="studentSearch" type="search" placeholder="Search by name, ID or email…" aria-label="Search students"></div><select id="riskFilter" aria-label="Filter by risk band"><option value="ALL">All assessment bands</option><option value="HIGH">Higher support</option><option value="MEDIUM">Watch list</option><option value="LOW">On track</option><option value="NONE">Not assessed</option></select><button class="secondary-button" id="refreshStudents">↻ Refresh</button><label class="upload-button">↑ Import CSV<input type="file" id="csvInput" accept=".csv" hidden></label></section>
+          <section class="panel glass student-table-panel"><div class="panel-heading"><div><h3>Student directory</h3><p id="studentCountLabel">All student records</p></div><span class="soft-pill" id="filteredCount">0 students</span></div><div class="table-wrap"><table><thead><tr><th>STUDENT</th><th>ATTENDANCE</th><th>INTERNAL MARKS</th><th>ASSESSMENT</th><th>RISK SCORE</th><th></th></tr></thead><tbody id="studentsTable"><tr><td colspan="6" class="empty-cell">Loading…</td></tr></tbody></table></div></section>
+
+          <section class="panel glass student-ai-chat-panel" id="studentAiChatPanel">
+            <div class="student-ai-chat-intro">
+              <div class="student-ai-chat-brand">
+                <span class="student-ai-orb">✦</span>
+                <div><h3><span id="studentAiChatName">ShikshaSetu AI Companion</span></h3><p>Your student-support chat space for academic questions, progress explanations and next-step ideas.</p></div>
+              </div>
+              <span class="chat-prototype-pill"><i></i> UI preview · Model connection pending</span>
+            </div>
+            <div class="student-ai-chat-layout">
+              <aside class="student-ai-chat-aside">
+                <b>Start with a topic</b>
+                <p>Choose a prompt or write your own question.</p>
+                <button type="button" class="chat-suggestion" data-chat-prompt="Can you explain my current risk assessment?">Explain my assessment <span>→</span></button>
+                <button type="button" class="chat-suggestion" data-chat-prompt="How can I improve my attendance?">Improve my attendance <span>→</span></button>
+                <button type="button" class="chat-suggestion" data-chat-prompt="Help me make a weekly study plan.">Build a weekly study plan <span>→</span></button>
+                <button type="button" class="chat-suggestion" data-chat-prompt="What can I do about incomplete assignments?">Plan assignment catch-up <span>→</span></button>
+                <div class="chat-privacy-note"><b>Support, not judgement.</b><br>This preview does not send chat messages to an AI model or use them to change student risk scores.</div>
+              </aside>
+              <section class="student-ai-chat-main" aria-label="Chat with ShikshaSetu AI Companion">
+                <div class="student-ai-chat-toolbar">
+                  <div><span class="chat-online-dot"></span><b>Learning companion</b><small>Preview mode</small></div>
+                  <label>Student context
+                    <select id="studentChatContext"><option value="">No student selected</option></select>
+                  </label>
+                  <button type="button" class="chat-clear-button" id="studentAiChatClear">Clear chat</button>
+                </div>
+                <div class="student-ai-chat-messages" id="studentAiChatMessages" aria-live="polite" aria-label="Chat messages">
+                  <article class="chat-message assistant"><span class="chat-avatar">✦</span><div><b id="studentAiChatGreetingName">ShikshaSetu AI</b><p>Hello! I’m your learning companion. You can ask about attendance, marks, assignments, an assessment explanation or planning your next study steps. This is a frontend conversation preview. The academic prediction model is a separate supervised model and does not generate free-form chat replies.</p><small>Just now</small></div></article>
+                </div>
+                <form class="student-ai-chat-compose" id="studentAiChatForm">
+                  <label class="sr-only" for="studentAiChatInput">Write your message</label>
+                  <textarea id="studentAiChatInput" rows="1" maxlength="1000" placeholder="Ask a question about your learning or support plan…" required></textarea>
+                  <button id="studentAiChatSend" type="submit" aria-label="Send message">Send <span>↗</span></button>
+                </form>
+                <div class="student-ai-chat-disclaimer">Prototype responses are generated from the local demo interface only. Do not enter passwords, private medical details or sensitive personal information.</div>
+              </section>
+            </div>
+          </section>
+        </section>
+
+        <section class="page" id="page-interventions">
+          <div class="eyebrow">PRACTICAL NEXT STEPS</div><h1>Interventions</h1><p class="page-subtitle">Small, thoughtful actions can make a meaningful difference.</p>
+          <div class="intervention-intro glass"><div class="intro-icon">✳</div><div><h3>Start with the student, not the score.</h3><p>These options are conversation starters. Choose them with the student and adapt them to their circumstances.</p></div></div>
+          <div class="intervention-grid" id="interventionGrid"><div class="panel glass loading-card">Loading intervention ideas…</div></div>
+        </section>
+
+
+        <section class="page" id="page-ai-admin">
+          <div class="ai-admin-heading">
+            <div><div class="eyebrow">PLATFORM INTELLIGENCE · CENTRAL OVERSIGHT</div><h1>AI Admin Console</h1><p class="page-subtitle">The AI system is the platform's administrative intelligence layer. Review student values, model outputs, fairness signals and manual interpretations in one workspace.</p></div>
+            <span class="ai-admin-status"><i></i> AI administrator · Frontend prototype</span>
+          </div>
+
+          <div class="notice ai-admin-notice"><span>✦</span><p><b>AI is the system administrator—not a human account.</b> This console centralises student data and decision-support outputs. Model recommendations remain advisory; mentor review and contextual interpretation are required before support actions are taken. No automated punishment, permanent labelling or high-stakes decision is performed here.</p></div>
+
+          <div class="ai-admin-metrics">
+            <article class="panel glass ai-admin-metric"><small>STUDENT RECORDS</small><strong id="aiAdminTotal">0</strong><span>Current workspace</span></article>
+            <article class="panel glass ai-admin-metric"><small>ASSESSED RECORDS</small><strong id="aiAdminAssessed">0</strong><span>With a current snapshot</span></article>
+            <article class="panel glass ai-admin-metric"><small>HIGHER SUPPORT</small><strong id="aiAdminHigh">0</strong><span>Requires contextual review</span></article>
+            <article class="panel glass ai-admin-metric"><small>MANUAL REVIEWS</small><strong id="aiAdminManual">0</strong><span>Saved interpretations</span></article>
+          </div>
+
+          <div class="ai-admin-main-grid">
+            <section class="panel glass ai-admin-panel ai-admin-registry">
+              <div class="panel-heading"><div><h3>Central student intelligence registry</h3><p>All available student values and the latest assessment snapshot.</p></div><span class="soft-pill" id="aiAdminRegistryCount">0 records</span></div>
+              <div class="ai-admin-table-wrap" role="region" aria-label="Student intelligence registry; scroll horizontally to view all columns" tabindex="0">
+                <table class="ai-admin-table">
+                  <thead><tr><th>STUDENT</th><th>ATTENDANCE</th><th>MARKS</th><th>ASSIGNMENTS</th><th>FAILURES</th><th>ABSENCES</th><th>RISK / 100</th><th>AUDIT GROUP</th><th></th></tr></thead>
+                  <tbody id="aiAdminStudentRows"><tr><td colspan="9" class="empty-cell">Loading student values…</td></tr></tbody>
+                </table>
+              </div>
+              <p class="ai-admin-footnote">Only fields present in the current student records are shown. Missing historical grades, attendance dates and subject-level history are not inferred.</p>
+            </section>
+
+            <section class="panel glass ai-admin-panel">
+              <div class="panel-heading"><div><h3>AI model and data overview</h3><p>Inspect the current system state and input coverage.</p></div><span class="ai-admin-model-icon">✦</span></div>
+              <div class="ai-model-state"><span class="ai-model-pulse"></span><div><b>Decision-support engine</b><small id="aiAdminModelState">Baseline rules · Prototype</small></div></div>
+              <div class="ai-admin-data-list">
+                <div><span>Attendance</span><b>Available</b></div>
+                <div><span>Internal marks</span><b>Available</b></div>
+                <div><span>Assignment completion</span><b>Available</b></div>
+                <div><span>Previous failures / absences</span><b>Available</b></div>
+                <div><span>Dated subject history</span><b>Manual snapshots only</b></div>
+                <div><span>Trained ML model</span><b id="aiModelStateLabel" class="pending">Not trained</b></div>
+              </div>
+              <div class="ai-admin-policy">
+              <div class="ai-model-training-box">
+                <div class="ai-model-training-head"><b>Academic deterioration model</b><span id="aiModelTrainingBadge" class="soft-pill">Not trained</span></div>
+                <p class="ai-admin-footnote">Train or replace the Weka Random Forest using approved, anonymised longitudinal CSV data. A template and target definition are provided. Demo student records are never used as training labels.</p>
+                <form id="aiModelTrainingForm" class="ai-model-training-form">
+                  <label class="field-label" for="aiModelTrainingFile">Labelled CSV dataset</label>
+                  <input id="aiModelTrainingFile" type="file" accept=".csv,text/csv" required>
+                  <div class="ai-model-training-actions">
+                    <a class="secondary-button" href="backend/ai-training/training-template.csv" download>Download CSV template</a>
+                    <button class="primary-button" id="aiModelTrainButton" type="submit">Train / replace model</button>
+                  </div>
+                </form>
+                <div id="aiModelTrainingStatus" class="ai-model-training-status" aria-live="polite">Model status is checked when the backend connects. Upload is disabled in demo mode.</div>
+                <div id="aiModelMetrics" class="ai-model-metrics"><div class="empty-state">No training metrics available yet.</div></div>
+              </div>
+                <b>Operating policy</b>
+                <label><input type="checkbox" checked disabled> Explain assessment contributors</label>
+                <label><input type="checkbox" checked disabled> Require mentor interpretation</label>
+                <label><input type="checkbox" checked disabled> Keep student labels time-bound</label>
+                <label><input type="checkbox" checked disabled> Keep age, mood and audit group out of individual score</label>
+              </div>
+            </section>
+          </div>
+
+          <div class="ai-admin-main-grid ai-admin-detail-grid">
+            <section class="panel glass ai-admin-panel">
+              <div class="panel-heading"><div><h3>Student value inspector</h3><p>Select a record to inspect raw inputs and the current model explanation.</p></div></div>
+              <label class="field-label">Student record<select id="aiAdminStudentSelect"><option value="">Choose a student</option></select></label>
+              <div id="aiAdminValueInspector" class="ai-admin-inspector"><div class="empty-state">Select a student from the registry.</div></div>
+              <div class="ai-admin-explanation-title"><b>Feature-level assessment explanation</b><span id="aiAdminRiskBand" class="soft-pill">Not assessed</span></div>
+              <div id="aiAdminFeatureExplanation" class="ai-admin-feature-explanation"><div class="empty-state">Assessment contributors will appear here.</div></div>
+            </section>
+
+            <section class="panel glass ai-admin-panel">
+              <div class="panel-heading"><div><h3>Manual interpretation & review</h3><p>Add a contextual interpretation without overwriting the model's original score.</p></div><span class="ai-admin-manual-tag">Human-in-the-loop</span></div>
+              <form id="aiAdminInterpretationForm" class="ai-admin-form">
+                <label class="field-label">Student<select id="aiAdminInterpretStudent" required><option value="">Choose a student</option></select></label>
+                <label class="field-label">Review status<select id="aiAdminReviewStatus"><option value="Needs mentor context">Needs mentor context</option><option value="Reviewed with student">Reviewed with student</option><option value="Follow-up planned">Follow-up planned</option><option value="Escalate to trained mentor">Escalate to trained mentor</option></select></label>
+                <label class="field-label">Manual interpretation<textarea id="aiAdminManualInterpretation" rows="4" maxlength="1600" placeholder="Describe the context behind the indicators. Note strengths, recent circumstances, missing information and the student's own perspective…" required></textarea></label>
+                <label class="field-label">Evidence / context checked<textarea id="aiAdminEvidence" rows="2" maxlength="800" placeholder="e.g. Reviewed latest attendance dates and spoke with the student…"></textarea></label>
+                <label class="field-label">Suggested next review action<textarea id="aiAdminNextAction" rows="2" maxlength="800" placeholder="e.g. Mentor check-in next week; review attendance trend…"></textarea></label>
+                <div class="ai-admin-form-actions"><button class="primary-button" type="submit">Save manual interpretation</button><button class="secondary-button" type="button" id="aiAdminClearForm">Clear form</button></div>
+                <p class="ai-admin-footnote" id="aiAdminPersistenceNote">Manual interpretations are stored separately from student values and never overwrite an assessment score.</p>
+              </form>
+            </section>
+          </div>
+
+          <section class="panel glass ai-admin-panel ai-admin-review-history">
+            <div class="panel-heading"><div><h3>Manual interpretation register</h3><p>Review saved context notes alongside the related model estimate.</p></div><span class="soft-pill" id="aiAdminReviewCount">0 entries</span></div>
+            <div id="aiAdminReviewHistory" class="ai-admin-review-list"><div class="empty-state">No manual interpretations saved yet.</div></div>
+          </section>
+
+          <div class="ai-admin-bottom-grid">
+            <section class="panel glass ai-admin-panel">
+              <div class="panel-heading"><div><h3>Fairness and safeguard monitor</h3><p>Quick reminders for responsible model oversight.</p></div></div>
+              <div class="ai-admin-safeguards">
+                <article><b>Explainability</b><p>Show the available feature contributions for each estimate.</p></article>
+                <article><b>Human context</b><p>Do not treat a correlation or score as a cause or a complete account of a student.</p></article>
+                <article><b>Fairness</b><p>Use group-level comparisons for audit only—not to calculate an individual's risk.</p></article>
+                <article><b>Time-bound review</b><p>Reassess with fresh evidence and avoid permanent student labels.</p></article>
+              </div>
+              <button class="secondary-button" type="button" data-go="fairness">Open full fairness audit →</button>
+            </section>
+            <section class="panel glass ai-admin-panel">
+              <div class="panel-heading"><div><h3>System activity</h3><p>Current frontend data and review status.</p></div></div>
+              <div class="ai-admin-activity" id="aiAdminActivity"><div class="empty-state">Activity will appear when student records are loaded.</div></div>
+              <button class="secondary-button" type="button" data-go="support">Open AI Mentor Support Loop →</button>
+            </section>
+          </div>
+        </section>
+
+        <section class="page" id="page-mentors">
+          <div class="eyebrow">HUMAN CONNECTION</div><h1>Mentor feedback</h1><p class="page-subtitle">Capture context, celebrate progress and keep follow-ups visible.</p>
+          <div class="mentor-layout">
+            <section class="panel glass feedback-form-panel"><div class="panel-heading"><div><h3>Log a check-in</h3><p>Record a supportive conversation</p></div><span class="form-symbol">✎</span></div>
+              <form id="feedbackForm"><label class="field-label">Student<select id="feedbackStudent" required><option value="">Choose a student</option></select></label><label class="field-label">Mentor name<input id="mentorName" placeholder="Your name" required></label><label class="field-label">What did you observe?<textarea id="mentorObservation" rows="4" placeholder="Share the student's perspective, strengths or challenges…" required></textarea></label><label class="field-label">Support / action agreed<textarea id="mentorAction" rows="3" placeholder="What support did you agree on?"></textarea></label><label class="field-label">Follow-up date<input id="followUpDate" type="datetime-local"></label><button class="primary-button full-width" type="submit">Save mentor feedback <span>→</span></button></form>
+            </section>
+            <section class="panel glass feedback-history-panel"><div class="panel-heading"><div><h3>Recent check-ins</h3><p>Latest mentor notes</p></div><span class="soft-pill">Activity</span></div><div id="feedbackHistory" class="feedback-list"><div class="empty-state">Feedback entries will appear here.</div></div></section>
+          </div>
+        </section>
+
+        <section class="page" id="page-fairness">
+          <div class="eyebrow">RESPONSIBLE INSIGHTS</div><h1>Fairness &amp; audit</h1><p class="page-subtitle">Review how the screening process behaves across groups. Look for questions, not quick conclusions.</p>
+          <div class="notice fairness-notice"><span>ⓘ</span><p><b>Fairness is an ongoing review.</b> Group comparisons are descriptive signals. Small samples, missing data and different student needs can affect the results. Never use group membership to calculate an individual student's risk.</p></div>
+          <section class="panel glass fairness-panel"><div class="panel-heading"><div><h3>Group-level review</h3><p>Latest assessed students grouped by optional audit category</p></div><button class="secondary-button" id="runFairness">↻ Run audit</button></div><div id="fairnessResults"><div class="empty-state">Run an audit to view group-level comparisons.</div></div></section>
+          <section class="panel glass safeguard-panel"><div class="panel-heading"><div><h3>Safeguards in place</h3><p>Principles for responsible student support</p></div></div><div class="safeguard-grid"><div><span>01</span><b>No permanent labels</b><p>Risk estimates are time-bound snapshots and can change.</p></div><div><span>02</span><b>Human review first</b><p>Mentors consider context before choosing any intervention.</p></div><div><span>03</span><b>Explain every estimate</b><p>Show the contributing academic indicators clearly.</p></div><div><span>04</span><b>Audit for fairness</b><p>Review group-level patterns and investigate disparities.</p></div></div></section>
+        </section>
+      </div>
+      <footer class="footer"><span>ShikshaSetu <b>·</b> Built for student growth</span><span>Insights are supportive signals, never labels.</span></footer>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="studentModal" aria-hidden="true"><section class="modal glass" role="dialog" aria-modal="true" aria-labelledby="studentModalTitle"><div class="modal-heading"><div><div class="eyebrow">STUDENT PROFILE</div><h2 id="studentModalTitle">Add a student</h2><p>Enter the latest available academic indicators.</p></div><button class="icon-button" data-close-modal aria-label="Close">×</button></div><form id="studentForm"><input type="hidden" id="editStudentId"><div class="form-grid"><label class="field-label">Student ID<input id="studentCode" required placeholder="e.g. STU-001"></label><label class="field-label">Full name<input id="fullName" required placeholder="Student full name"></label><label class="field-label">Email<input id="email" type="email" placeholder="student@example.com"></label><label class="field-label">Audit group <span class="optional">optional</span><input id="auditGroup" placeholder="For aggregate fairness review"></label><label class="field-label">Attendance (%)<input id="attendance" type="number" min="0" max="100" step="0.1" required placeholder="0–100"></label><label class="field-label">Internal marks (%)<input id="internalMarks" type="number" min="0" max="100" step="0.1" required placeholder="0–100"></label><label class="field-label">Assignments completed (%)<input id="assignmentsCompleted" type="number" min="0" max="100" step="0.1" required placeholder="0–100"></label><label class="field-label">Previous course failures<input id="previousFailures" type="number" min="0" step="1" value="0" required></label><label class="field-label">Absence count<input id="absences" type="number" min="0" step="1" value="0" required></label></div><p class="form-hint">Audit group is only used for aggregate fairness review. It is not included in individual risk scoring.</p><div class="modal-actions"><button type="button" class="secondary-button" data-close-modal>Cancel</button><button type="submit" class="primary-button">Save student</button></div></form></section></div>
+
+  <div class="modal-backdrop" id="detailModal" aria-hidden="true"><section class="modal glass detail-modal" role="dialog" aria-modal="true" aria-labelledby="detailName"><div class="modal-heading"><div><div class="eyebrow">STUDENT OVERVIEW</div><h2 id="detailName">Student</h2><p id="detailMeta"></p></div><button class="icon-button" data-close-modal aria-label="Close">×</button></div><div id="detailBody"></div></section></div>
+
+
+  <div class="modal-backdrop" id="accountSetupModal" aria-hidden="true"><section class="modal glass account-setup-modal" role="dialog" aria-modal="true" aria-labelledby="accountSetupTitle">
+    <div class="modal-heading"><div><div class="eyebrow">PERSONALISE YOUR WORKSPACE</div><h2 id="accountSetupTitle">Update your account profile</h2><p>Update your workspace identity and AI Mentor display name.</p></div><button class="icon-button" data-close-modal aria-label="Close">×</button></div>
+    <form id="accountSetupForm" class="account-setup-form">
+      <div class="form-grid">
+        <label class="field-label">Full name<input id="accountFullName" type="text" maxlength="80" autocomplete="name" placeholder="Your full name" required></label>
+        <label class="field-label">Email address<input id="accountEmail" type="email" maxlength="120" autocomplete="email" placeholder="you@example.com" required></label>
+        <label class="field-label">Age<input id="accountAge" type="number" min="13" max="100" placeholder="Your age" required></label>
+        <label class="field-label">I am joining as<select id="accountRole"><option value="Student">Student</option><option value="Mentor">Mentor</option></select></label>
+        <label class="field-label">Password<input id="accountPassword" type="password" minlength="8" autocomplete="new-password" placeholder="At least 8 characters" required></label>
+        <label class="field-label">Confirm password<input id="accountPasswordConfirm" type="password" minlength="8" autocomplete="new-password" placeholder="Re-enter password" required></label>
+      </div>
+      <div class="ai-mentor-name-field">
+        <span class="ai-mentor-name-icon">✦</span>
+        <div class="ai-mentor-name-copy"><b>What would you like to name your AI Mentor?</b><small>This is the name shown by your personal learning companion throughout ShikshaSetu.</small></div>
+        <input id="aiMentorDisplayName" type="text" maxlength="32" minlength="2" placeholder="e.g. Aarya, Moss, Saanvi…" required>
+      </div>
+      <p class="account-setup-disclaimer"><b>Prototype account setup:</b> the profile and AI Mentor display name are saved in this browser only. The password is validated but never stored. Secure account registration and authentication will be connected through Spring Boot later.</p>
+      <div class="modal-actions"><button type="button" class="secondary-button" data-close-modal>Cancel</button><button type="submit" class="primary-button">Save profile changes <span>→</span></button></div>
+      <p class="account-setup-message" id="accountSetupMessage" role="status" aria-live="polite"></p>
+    </form>
+  </section></div>
+
+  <div class="modal-backdrop" id="appearanceModal" aria-hidden="true"><section class="modal glass appearance-modal" role="dialog" aria-modal="true"><div class="modal-heading"><div><div class="eyebrow">PERSONALISE YOUR SPACE</div><h2>Appearance</h2><p>Keep the glass look, tune its intensity.</p></div><button class="icon-button" data-close-modal aria-label="Close">×</button></div><div class="appearance-row glass-meter-row">
+    <div class="glass-meter-copy">
+      <b>Glass transparency <output id="glassValue" for="glassRange">28% transparent · 72% glass fill</output></b>
+      <small>Move right for clearer, more transparent moss glass. Move left for a stronger frosted-glass fill.</small>
+    </div>
+    <div class="glass-meter-control">
+      <span class="glass-meter-end">Solid</span>
+      <input type="range" id="glassRange" min="15" max="85" step="1" value="28" aria-label="Glass transparency" aria-describedby="glassValue">
+      <span class="glass-meter-end">Clear</span>
+      <button class="secondary-button glass-reset-button" type="button" id="glassReset">Reset</button>
+    </div>
+  </div>
+  <section class="nature-gallery-settings" aria-labelledby="natureGalleryTitle">
+    <div class="nature-gallery-heading">
+      <div>
+        <b id="natureGalleryTitle">Living nature backgrounds</b>
+        <small>24 calming monsoon and forest scenes with a gentle crossfade.</small>
+      </div>
+      <span class="nature-gallery-count" id="natureSceneCount">01 / 24</span>
+    </div>
+
+    <div class="nature-gallery-current">
+      <div class="nature-gallery-preview" id="natureScenePreview" aria-hidden="true"></div>
+      <div class="nature-gallery-current-copy">
+        <b id="natureSceneName">Misty Rainforest Valley</b>
+        <small id="natureSceneDescription">Monsoon · Scene 01</small>
+      </div>
+    </div>
+
+    <div class="appearance-row nature-gallery-toggle-row">
+      <div><b>Automatic scene rotation</b><small>Let the background change gently while you work.</small></div>
+      <label class="switch"><input type="checkbox" id="natureAutoRotate" checked><span></span></label>
+    </div>
+
+    <div class="nature-gallery-controls-grid">
+      <label class="nature-control-field" for="natureInterval">
+        <span>Change background every</span>
+        <select id="natureInterval">
+          <option value="15">15 seconds</option>
+          <option value="30">30 seconds</option>
+          <option value="60">1 minute</option>
+          <option value="120">2 minutes</option>
+          <option value="180">3 minutes</option>
+          <option value="300" selected>5 minutes</option>
+          <option value="600">10 minutes</option>
+          <option value="900">15 minutes</option>
+          <option value="1800">30 minutes</option>
+        </select>
+      </label>
+      <label class="nature-control-field" for="natureCategory">
+        <span>Scenery collection</span>
+        <select id="natureCategory">
+          <option value="all">All natural scenes</option>
+          <option value="Monsoon">Monsoon & mist</option>
+          <option value="Forest">Forest paths</option>
+          <option value="Waterfall">Waterfalls & streams</option>
+          <option value="Water">Lakes & reflections</option>
+          <option value="Foliage">Rain-wet foliage</option>
+          <option value="Hills">Green hills</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="nature-gallery-options">
+      <label class="nature-shuffle-option"><input type="checkbox" id="natureShuffle" checked><span>Shuffle scenes for a less predictable rotation</span></label>
+      <span class="nature-gallery-status" id="natureRotationStatus" aria-live="polite">Automatic rotation is on · every 5 minutes</span>
+    </div>
+
+    <div class="nature-gallery-buttons">
+      <button class="secondary-button" type="button" id="naturePrevious">← Previous</button>
+      <button class="primary-button" type="button" id="natureNext">Change scene now →</button>
+      <button class="secondary-button" type="button" id="natureReset">Reset</button>
+    </div>
+    <p class="nature-gallery-note">Your selection is saved on this device and also applies to the login screen. Images are bundled locally, so the gallery works offline.</p>
+  </section>
+
+  <div class="appearance-row"><div><b>Background glow</b><small>Keep the soft ambient colour or tone it down.</small></div><label class="switch"><input type="checkbox" id="glowToggle" checked><span></span></label></div><div class="appearance-row"><div><b>Theme</b><small>Switch between light and dark mode.</small></div><button class="secondary-button" id="appearanceTheme">Toggle theme ◐</button></div></section></div>
+
+  <div class="toast-region" id="toastRegion" aria-live="polite"></div>
+  <script src="dashboard-session.js"></script>
+  <script src="app.js"></script>
+  <script src="nature-gallery.js"></script>
+</body></html>

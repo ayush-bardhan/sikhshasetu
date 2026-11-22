@@ -1,0 +1,1024 @@
+/* =====================================================================
+   ShikshaSetu — v142 reference box system
+   One authoritative layer for login, dashboard, mentor, student and admin UI.
+   Visual-only: HTML structure, JavaScript behavior and API contracts stay intact.
+   Assets are local to /assets and theme selection remains data-theme driven.
+   ===================================================================== */
+
+:root {
+  color-scheme: light;
+  --glass-alpha: .72;
+  --surface: rgba(242, 249, 235, var(--glass-alpha));
+  --surface-strong: rgba(244, 250, 238, .94);
+  --surface-soft: rgba(224, 238, 214, .76);
+  --border: rgba(255, 255, 255, .78);
+  --border-soft: rgba(64, 98, 53, .18);
+  --text: #213323;
+  --muted: #637960;
+  --muted2: #879982;
+  --primary: #47743d;
+  --primary2: #2d5b35;
+  --green: #4d8a48;
+  --amber: #ad7c31;
+  --red: #b44e42;
+  --violet: #708b55;
+  --bg: #e8f0df;
+  --bg2: #d8e6cf;
+  --page: #e8f0df;
+  --field: rgba(247, 251, 242, .88);
+  --sidebar: rgba(234, 245, 225, .78);
+  --glass-blur: 24px;
+  --radius: 22px;
+  --moss-box-radius: 22px;
+  --moss-nested-radius: 14px;
+}
+
+html[data-theme="light"], html:not([data-theme="dark"]) {
+  color-scheme: light;
+  --surface: rgba(242, 249, 235, var(--glass-alpha));
+  --surface-strong: rgba(244, 250, 238, .94);
+  --surface-soft: rgba(224, 238, 214, .76);
+  --text: #213323;
+  --muted: #637960;
+  --muted2: #879982;
+  --primary: #47743d;
+  --primary2: #2d5b35;
+  --green: #4d8a48;
+  --amber: #ad7c31;
+  --red: #b44e42;
+  --violet: #708b55;
+  --bg: #e8f0df;
+  --bg2: #d8e6cf;
+  --page: #e8f0df;
+  --field: rgba(247, 251, 242, .88);
+  --sidebar: rgba(234, 245, 225, .78);
+  --moss-edge: rgba(255, 255, 255, .88);
+  --moss-edge-bottom: rgba(89, 132, 62, .12);
+  --moss-shadow: 0 16px 42px rgba(40, 73, 35, .13);
+  --moss-inner: rgba(255, 255, 255, .92);
+  --moss-texture-opacity: .105;
+  --moss-frame-opacity: .72;
+  --moss-control: rgba(247, 251, 242, .94);
+  --moss-control-edge: rgba(92, 132, 67, .25);
+  --moss-control-text: #213323;
+  --moss-control-muted: #71846d;
+  --moss-row: rgba(237, 246, 229, .48);
+  --moss-row-alt: rgba(218, 235, 207, .36);
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --surface: rgba(8, 27, 12, var(--glass-alpha));
+  --surface-strong: rgba(14, 35, 17, .95);
+  --surface-soft: rgba(31, 62, 34, .68);
+  --text: #f0f6e9;
+  --muted: #b6c7ad;
+  --muted2: #82977b;
+  --primary: #b7df81;
+  --primary2: #d0ed9b;
+  --green: #8cc96c;
+  --amber: #e8bd63;
+  --red: #ff9583;
+  --violet: #b5ca8a;
+  --bg: #09150c;
+  --bg2: #142519;
+  --page: #08130b;
+  --field: rgba(7, 22, 10, .78);
+  --sidebar: rgba(7, 24, 10, .84);
+  --moss-edge: rgba(176, 222, 133, .34);
+  --moss-edge-bottom: rgba(91, 155, 60, .28);
+  --moss-shadow: 0 20px 56px rgba(0, 0, 0, .34);
+  --moss-inner: rgba(233, 255, 214, .20);
+  --moss-texture-opacity: .22;
+  --moss-frame-opacity: .78;
+  --moss-control: rgba(7, 22, 10, .88);
+  --moss-control-edge: rgba(155, 203, 111, .38);
+  --moss-control-text: #f0f6e9;
+  --moss-control-muted: #b6c7ad;
+  --moss-row: rgba(4, 22, 8, .34);
+  --moss-row-alt: rgba(30, 62, 31, .28);
+}
+
+html, body { background-color: var(--page); color: var(--text); }
+body { isolation: isolate; }
+body::before {
+  background-image:
+    linear-gradient(135deg, rgba(221, 237, 207, .48), rgba(221, 237, 207, .58)),
+    url("assets/forest-moss-background.jpg");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  opacity: .93;
+  mix-blend-mode: multiply;
+}
+html[data-theme="dark"] body::before {
+  background-image:
+    linear-gradient(135deg, rgba(2, 13, 5, .48), rgba(3, 16, 6, .64)),
+    url("assets/forest-moss-background.jpg");
+  opacity: 1;
+  mix-blend-mode: normal;
+}
+body.no-glow::before { opacity: .34; }
+html[data-theme="dark"] body.no-glow::before { opacity: .50; }
+
+/* ---------------------------------------------------------------------
+   Main box material — copied from the v142 light/dark reference behavior.
+   Texture is a low-opacity FACE layer; moss-panel-frame supplies the rim.
+   --------------------------------------------------------------------- */
+.app-shell .glass,
+.app-shell .modal.glass {
+  position: relative;
+  isolation: isolate;
+  background-color: transparent !important;
+  background-image: linear-gradient(
+    135deg,
+    rgba(250, 254, 246, var(--glass-alpha, .72)),
+    rgba(229, 241, 219, calc(var(--glass-alpha, .72) * .88))
+  ) !important;
+  background-repeat: no-repeat !important;
+  background-size: 100% 100% !important;
+  background-blend-mode: normal !important;
+  border: 1px solid rgba(255, 255, 255, .88) !important;
+  border-radius: var(--moss-box-radius) !important;
+  box-shadow:
+    0 16px 42px rgba(40, 73, 35, .13),
+    inset 0 1px 0 rgba(255, 255, 255, .92),
+    inset 0 -1px 0 rgba(89, 132, 62, .12) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(165%);
+  backdrop-filter: blur(28px) saturate(165%);
+  transition: border-color .22s ease, box-shadow .22s ease, background-color .22s ease;
+}
+
+.app-shell .glass::before,
+.app-shell .glass::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.app-shell .glass::before {
+  z-index: 0;
+  background-image: url("assets/moss-surface-light.jpg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: .105;
+  mix-blend-mode: multiply;
+  filter: saturate(1.18) contrast(1.06);
+}
+.app-shell .glass::after {
+  z-index: 1;
+  background-image:
+    url("assets/moss-panel-frame.png"),
+    linear-gradient(128deg, rgba(255,255,255,.25) 0%, transparent 20%, transparent 76%, rgba(183,228,139,.10) 100%);
+  background-size: 100% 100%, 100% 100%;
+  background-position: center, center;
+  background-repeat: no-repeat;
+  opacity: .72;
+}
+.app-shell .glass > * { position: relative; z-index: 2; }
+.app-shell .glass > .hero-art { position: absolute; z-index: 2; }
+
+html[data-theme="dark"] .app-shell .glass,
+html[data-theme="dark"] .app-shell .modal.glass {
+  background-image: linear-gradient(
+    135deg,
+    rgba(5, 25, 9, calc(var(--glass-alpha, .72) * .90)),
+    rgba(10, 37, 14, calc(var(--glass-alpha, .72) * .77))
+  ) !important;
+  border-color: rgba(176, 222, 133, .34) !important;
+  box-shadow:
+    0 20px 56px rgba(0, 0, 0, .34),
+    inset 0 1px 0 rgba(233, 255, 214, .20),
+    inset 0 -1px 0 rgba(91, 155, 60, .28) !important;
+}
+html[data-theme="dark"] .app-shell .glass::before {
+  background-image: url("assets/moss-surface-dark.jpg");
+  opacity: .22;
+  mix-blend-mode: screen;
+  filter: saturate(1.12) contrast(1.08);
+}
+html[data-theme="dark"] .app-shell .glass::after {
+  opacity: .78;
+  background-image:
+    url("assets/moss-panel-frame.png"),
+    linear-gradient(130deg, rgba(234,255,217,.18) 0%, transparent 22%, transparent 73%, rgba(132,207,77,.12) 100%);
+}
+
+/* Sidebar is deliberately calmer than content cards, exactly as in v142. */
+.app-shell .sidebar.glass {
+  background-color: var(--sidebar) !important;
+  background-image: linear-gradient(155deg, rgba(244,251,237,.84), rgba(220,237,207,.76)) !important;
+  border-color: rgba(255,255,255,.86) !important;
+  box-shadow: 0 20px 50px rgba(37,73,34,.16), inset 0 1px 0 rgba(255,255,255,.90) !important;
+}
+html[data-theme="dark"] .app-shell .sidebar.glass {
+  background-color: var(--sidebar) !important;
+  background-image: linear-gradient(155deg, rgba(4,23,8,.90), rgba(10,37,14,.84)) !important;
+  border-color: rgba(169,218,124,.30) !important;
+  box-shadow: 0 20px 50px rgba(0,0,0,.30), inset 0 1px 0 rgba(229,255,210,.13) !important;
+}
+.app-shell .sidebar.glass::before { opacity: .035; }
+html[data-theme="dark"] .app-shell .sidebar.glass::before { opacity: .045; }
+
+/* Hero boxes receive a more opaque reading zone without changing layout. */
+.app-shell .hero-panel.glass,
+.app-shell .edash-hero.glass {
+  background-image: linear-gradient(105deg, rgba(244,251,237,.91), rgba(220,238,207,.82) 54%, rgba(173,207,143,.56)) !important;
+}
+html[data-theme="dark"] .app-shell .hero-panel.glass,
+html[data-theme="dark"] .app-shell .edash-hero.glass {
+  background-image: linear-gradient(105deg, rgba(4,25,8,.91), rgba(9,40,13,.82) 54%, rgba(29,75,25,.60)) !important;
+}
+.app-shell .hero-copy h2,
+.app-shell .hero-copy p,
+.app-shell .hero-kicker,
+.app-shell .edash-hero h1,
+.app-shell .edash-hero h2,
+.app-shell .edash-hero p { color: #203b25; text-shadow: none; }
+html[data-theme="dark"] .app-shell .hero-copy h2,
+html[data-theme="dark"] .app-shell .hero-copy p,
+html[data-theme="dark"] .app-shell .hero-kicker,
+html[data-theme="dark"] .app-shell .edash-hero h1,
+html[data-theme="dark"] .app-shell .edash-hero h2,
+html[data-theme="dark"] .app-shell .edash-hero p { color: #f0f8e9; }
+.app-shell .hero-copy h2 em { color: #47743d; }
+html[data-theme="dark"] .app-shell .hero-copy h2 em { color: #b7df81; }
+
+/* The non-glass micro-surfaces use a restrained inset finish, not a second card. */
+.app-shell .help-card,
+.app-shell .notice,
+.app-shell .support-ai-notice,
+.app-shell .ai-admin-notice,
+.app-shell .fairness-notice,
+.app-shell .support-selected-note,
+.app-shell .support-privacy-note,
+.app-shell .chat-privacy-note,
+.app-shell .ai-model-training-box,
+.app-shell .ai-model-training-status,
+.app-shell .ai-mentor-name-field,
+.app-shell .support-wellbeing-block,
+.app-shell .feedback-entry,
+.app-shell .safeguard-grid > div,
+.app-shell .edash-hero-note,
+.app-shell .form-hint,
+.app-shell .detail-top,
+.app-shell .glass-meter-row {
+  color: #28442c;
+  background: linear-gradient(145deg, rgba(246,252,240,.84), rgba(224,239,213,.72));
+  border: 1px solid rgba(103,149,75,.22);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.78), 0 7px 20px rgba(36,73,31,.06);
+}
+html[data-theme="dark"] .app-shell .help-card,
+html[data-theme="dark"] .app-shell .notice,
+html[data-theme="dark"] .app-shell .support-ai-notice,
+html[data-theme="dark"] .app-shell .ai-admin-notice,
+html[data-theme="dark"] .app-shell .fairness-notice,
+html[data-theme="dark"] .app-shell .support-selected-note,
+html[data-theme="dark"] .app-shell .support-privacy-note,
+html[data-theme="dark"] .app-shell .chat-privacy-note,
+html[data-theme="dark"] .app-shell .ai-model-training-box,
+html[data-theme="dark"] .app-shell .ai-model-training-status,
+html[data-theme="dark"] .app-shell .ai-mentor-name-field,
+html[data-theme="dark"] .app-shell .support-wellbeing-block,
+html[data-theme="dark"] .app-shell .feedback-entry,
+html[data-theme="dark"] .app-shell .safeguard-grid > div,
+html[data-theme="dark"] .app-shell .edash-hero-note,
+html[data-theme="dark"] .app-shell .form-hint,
+html[data-theme="dark"] .app-shell .detail-top,
+html[data-theme="dark"] .app-shell .glass-meter-row {
+  color: #eaf5e2;
+  background: linear-gradient(145deg, rgba(7,27,11,.88), rgba(17,47,21,.82));
+  border-color: rgba(150,202,105,.24);
+  box-shadow: inset 0 1px 0 rgba(231,255,212,.10), 0 9px 24px rgba(0,0,0,.16);
+}
+.app-shell .help-card { border-radius: 17px; }
+.app-shell .notice,
+.app-shell .support-ai-notice,
+.app-shell .ai-admin-notice,
+.app-shell .fairness-notice { border-radius: 14px; }
+.app-shell .support-wellbeing-block,
+.app-shell .feedback-entry,
+.app-shell .safeguard-grid > div { border-radius: 14px; }
+.app-shell .help-card strong,
+.app-shell .help-card p,
+.app-shell .notice p,
+.app-shell .notice b,
+.app-shell .support-wellbeing-block h4,
+.app-shell .support-wellbeing-block p,
+.app-shell .feedback-entry p,
+.app-shell .feedback-entry small { color: inherit; }
+
+/* Tables are nested content inside a panel, not heavy cards of their own. */
+.app-shell :is(.table-wrap, .ai-admin-table-wrap) {
+  background: rgba(247,251,243,.20) !important;
+  background-image: none !important;
+  border: 1px solid rgba(105,145,82,.15) !important;
+  border-radius: 13px !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.32) !important;
+  overflow-x: auto;
+}
+html[data-theme="dark"] .app-shell :is(.table-wrap, .ai-admin-table-wrap) {
+  background: rgba(1,16,5,.18) !important;
+  border-color: rgba(144,194,102,.16) !important;
+  box-shadow: inset 0 1px 0 rgba(228,255,208,.05) !important;
+}
+.app-shell :is(.table-wrap, .ai-admin-table-wrap) table { background: transparent !important; color: var(--text); }
+.app-shell :is(.table-wrap, .ai-admin-table-wrap) thead th {
+  color: #36583a;
+  background: rgba(218,235,205,.68);
+  border-bottom: 1px solid rgba(86,130,62,.20);
+}
+.app-shell :is(.table-wrap, .ai-admin-table-wrap) tbody td {
+  color: #2d4630;
+  background: rgba(250,253,247,.36);
+  border-bottom: 1px solid rgba(92,132,67,.12);
+}
+.app-shell :is(.table-wrap, .ai-admin-table-wrap) tbody tr:nth-child(even) td { background: rgba(221,237,211,.32); }
+.app-shell :is(.table-wrap, .ai-admin-table-wrap) tbody tr:hover td { background: rgba(191,220,169,.38); }
+html[data-theme="dark"] .app-shell :is(.table-wrap, .ai-admin-table-wrap) thead th {
+  color: #eff8e8; background: rgba(52,91,42,.48); border-bottom-color: rgba(173,220,131,.18);
+}
+html[data-theme="dark"] .app-shell :is(.table-wrap, .ai-admin-table-wrap) tbody td {
+  color: #e7f2df; background: rgba(2,20,7,.28); border-bottom-color: rgba(166,219,122,.12);
+}
+html[data-theme="dark"] .app-shell :is(.table-wrap, .ai-admin-table-wrap) tbody tr:nth-child(even) td { background: rgba(30,72,28,.22); }
+html[data-theme="dark"] .app-shell :is(.table-wrap, .ai-admin-table-wrap) tbody tr:hover td { background: rgba(104,167,64,.18); }
+
+/* Inputs, filters, selects and text areas use the same recessed moss finish. */
+.app-shell :is(.field-label input, .field-label select, .field-label textarea, .search-field input, .filters-panel select, .ai-mentor-name-field input) {
+  color: var(--moss-control-text) !important;
+  background: linear-gradient(145deg, rgba(250,253,247,.96), rgba(232,244,220,.92)) !important;
+  border: 1px solid var(--moss-control-edge) !important;
+  border-radius: 12px !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.86), inset 0 -2px 7px rgba(57,104,44,.045) !important;
+}
+.app-shell :is(.field-label input, .field-label select, .field-label textarea, .search-field input, .filters-panel select)::placeholder {
+  color: var(--moss-control-muted) !important;
+  opacity: 1;
+}
+html[data-theme="dark"] .app-shell :is(.field-label input, .field-label select, .field-label textarea, .search-field input, .filters-panel select, .ai-mentor-name-field input) {
+  color: var(--moss-control-text) !important;
+  background: linear-gradient(145deg, rgba(5,24,9,.94), rgba(13,39,16,.90)) !important;
+  border-color: var(--moss-control-edge) !important;
+  box-shadow: inset 0 1px 0 rgba(232,255,214,.08), inset 0 -2px 7px rgba(0,0,0,.18) !important;
+}
+.app-shell :is(.field-label input, .field-label select, .field-label textarea, .search-field input, .filters-panel select)::placeholder {
+  color: var(--moss-control-muted) !important;
+}
+.app-shell :is(.field-label input, .field-label select, .field-label textarea, .search-field input, .filters-panel select):focus {
+  outline: 3px solid rgba(115,169,75,.20);
+  outline-offset: 1px;
+  border-color: #79a94f !important;
+}
+html[data-theme="dark"] .app-shell select option { color: #eef7e6; background: #102516; }
+
+/* Navigation, status chips and actions follow the same moss palette. */
+.app-shell .brand-mark { background: linear-gradient(145deg, #78a94b, #376b3b); box-shadow: 0 8px 20px rgba(49,93,43,.28); }
+.app-shell .nav-item.active {
+  color: var(--primary) !important;
+  background: linear-gradient(110deg, rgba(94,146,63,.18), rgba(94,146,63,.07)) !important;
+  box-shadow: inset 3px 0 var(--primary) !important;
+}
+.app-shell .primary-button,
+.app-shell .hero-button {
+  color: #f8fff0 !important;
+  background: linear-gradient(135deg, #6f9f43, #376b3b) !important;
+  border: 1px solid rgba(239,255,220,.34) !important;
+  box-shadow: 0 7px 18px rgba(49,100,43,.22), inset 0 1px 0 rgba(255,255,255,.26) !important;
+}
+.app-shell .secondary-button,
+.app-shell .upload-button,
+.app-shell .icon-button,
+.app-shell .edash-glass-button {
+  color: var(--text) !important;
+  background: rgba(242,249,235,.62) !important;
+  border: 1px solid rgba(93,139,66,.24) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.70) !important;
+}
+html[data-theme="dark"] .app-shell .secondary-button,
+html[data-theme="dark"] .app-shell .upload-button,
+html[data-theme="dark"] .app-shell .icon-button,
+html[data-theme="dark"] .app-shell .edash-glass-button {
+  color: #edf7e5 !important;
+  background: rgba(7,28,11,.72) !important;
+  border-color: rgba(154,204,108,.27) !important;
+  box-shadow: inset 0 1px 0 rgba(230,255,212,.10) !important;
+}
+.app-shell .api-status,
+.app-shell .date-chip,
+.app-shell .soft-pill,
+.app-shell .nav-count {
+  color: var(--muted) !important;
+  background: rgba(238,247,229,.62) !important;
+  border-color: rgba(97,140,71,.20) !important;
+}
+html[data-theme="dark"] .app-shell .api-status,
+html[data-theme="dark"] .app-shell .date-chip,
+html[data-theme="dark"] .app-shell .soft-pill,
+html[data-theme="dark"] .app-shell .nav-count {
+  color: #c7d8bc !important;
+  background: rgba(6,27,10,.62) !important;
+  border-color: rgba(146,197,101,.20) !important;
+}
+
+/* Text contrast is tuned separately for content boxes and the forest canvas. */
+html[data-theme="light"] .app-shell .glass :is(h1,h2,h3,h4,strong,b),
+html:not([data-theme="dark"]) .app-shell .glass :is(h1,h2,h3,h4,strong,b) { color: #203b25; }
+html[data-theme="light"] .app-shell .glass :is(p,small,label,span),
+html:not([data-theme="dark"]) .app-shell .glass :is(p,small,label,span) { text-shadow: none; }
+html[data-theme="dark"] .app-shell .glass :is(h1,h2,h3,h4,strong,b) { color: #f1f9e9; }
+html[data-theme="dark"] .app-shell .glass :is(p,small,label) { color: #c5d8b9; }
+html[data-theme="light"] .app-shell .panel-heading h2,
+html:not([data-theme="dark"]) .app-shell .panel-heading h2 { color: #203b25; }
+html[data-theme="dark"] .app-shell .panel-heading h2 { color: #f1f9e9; }
+
+/* Login and account-creation boxes use the same v142 surface + frame pairing. */
+.login-topbar,
+.login-benefit,
+.login-card,
+.login-principle,
+.login-mentor-name {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: #203b25 !important;
+  background-color: transparent !important;
+  background-image: linear-gradient(135deg, rgba(250,254,246,.90), rgba(229,241,219,.82)) !important;
+  border: 1px solid rgba(255,255,255,.88) !important;
+  box-shadow: 0 16px 42px rgba(40,73,35,.13), inset 0 1px 0 rgba(255,255,255,.92), inset 0 -1px 0 rgba(89,132,62,.12) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(165%);
+  backdrop-filter: blur(28px) saturate(165%);
+}
+.login-topbar::before,
+.login-benefit::before,
+.login-card::before,
+.login-principle::before,
+.login-mentor-name::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: url("assets/moss-surface-light.jpg") center / cover no-repeat;
+  opacity: .105;
+  mix-blend-mode: multiply;
+}
+.login-topbar::after,
+.login-benefit::after,
+.login-card::after,
+.login-principle::after,
+.login-mentor-name::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: url("assets/moss-panel-frame.png") center / 100% 100% no-repeat,
+    linear-gradient(128deg, rgba(255,255,255,.25), transparent 20%, transparent 76%, rgba(183,228,139,.10));
+  opacity: .72;
+}
+.login-topbar > *,
+.login-benefit > *,
+.login-card > *,
+.login-principle > *,
+.login-mentor-name > * { position: relative; z-index: 2; }
+.login-card-inner { position: relative; z-index: 2; }
+.login-topbar { border-radius: 20px !important; }
+.login-benefit { border-radius: 18px !important; }
+.login-card { border-radius: 26px !important; }
+.login-principle { border-radius: 14px !important; border-left: 3px solid #77a64d !important; }
+.login-mentor-name { border-radius: 14px !important; }
+.login-brand, .login-brand strong, .login-brand small,
+.login-top-label, .login-benefit b, .login-benefit small,
+.login-principle b, .login-principle small { color: #29472d !important; text-shadow: none !important; }
+.login-story h1, .login-story-copy, .login-eyebrow { text-shadow: 0 2px 8px rgba(0,0,0,.42); }
+.login-card h2, .login-card-kicker, .login-card-subtitle,
+.login-field > span, .login-card-footer, .login-check,
+.login-mentor-copy b, .login-mentor-copy small,
+.login-disclaimer, .login-disclaimer b { color: #29472d !important; }
+.login-input-wrap {
+  background: linear-gradient(145deg, rgba(250,253,247,.96), rgba(232,244,220,.92)) !important;
+  border: 1px solid rgba(92,132,67,.25) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.86), inset 0 -2px 7px rgba(57,104,44,.045) !important;
+}
+.login-input-wrap input, .login-input-wrap select { color: #213323 !important; }
+.login-input-wrap input::placeholder { color: #71846d !important; opacity: 1; }
+.login-tab.active { background: linear-gradient(135deg, #6f9f43, #376b3b) !important; }
+.login-submit { background: linear-gradient(135deg, #6f9f43, #376b3b) !important; }
+
+html[data-theme="dark"] .login-topbar,
+html[data-theme="dark"] .login-benefit,
+html[data-theme="dark"] .login-card,
+html[data-theme="dark"] .login-principle,
+html[data-theme="dark"] .login-mentor-name {
+  color: #f0f6e9 !important;
+  background-color: transparent !important;
+  background-image: linear-gradient(135deg, rgba(5,25,9,.90), rgba(10,37,14,.84)) !important;
+  border-color: rgba(176,222,133,.34) !important;
+  box-shadow: 0 20px 56px rgba(0,0,0,.34), inset 0 1px 0 rgba(233,255,214,.20), inset 0 -1px 0 rgba(91,155,60,.28) !important;
+}
+html[data-theme="dark"] .login-topbar::before,
+html[data-theme="dark"] .login-benefit::before,
+html[data-theme="dark"] .login-card::before,
+html[data-theme="dark"] .login-principle::before,
+html[data-theme="dark"] .login-mentor-name::before {
+  background-image: url("assets/moss-surface-dark.jpg");
+  opacity: .22;
+  mix-blend-mode: screen;
+  filter: saturate(1.12) contrast(1.08);
+}
+html[data-theme="dark"] .login-topbar::after,
+html[data-theme="dark"] .login-benefit::after,
+html[data-theme="dark"] .login-card::after,
+html[data-theme="dark"] .login-principle::after,
+html[data-theme="dark"] .login-mentor-name::after {
+  opacity: .78;
+  background-image: url("assets/moss-panel-frame.png"), linear-gradient(130deg, rgba(234,255,217,.18), transparent 22%, transparent 73%, rgba(132,207,77,.12));
+}
+html[data-theme="dark"] .login-brand,
+html[data-theme="dark"] .login-brand strong,
+html[data-theme="dark"] .login-brand small,
+html[data-theme="dark"] .login-top-label,
+html[data-theme="dark"] .login-benefit b,
+html[data-theme="dark"] .login-benefit small,
+html[data-theme="dark"] .login-principle b,
+html[data-theme="dark"] .login-principle small,
+html[data-theme="dark"] .login-card h2,
+html[data-theme="dark"] .login-card-kicker,
+html[data-theme="dark"] .login-card-subtitle,
+html[data-theme="dark"] .login-field > span,
+html[data-theme="dark"] .login-card-footer,
+html[data-theme="dark"] .login-check,
+html[data-theme="dark"] .login-mentor-copy b,
+html[data-theme="dark"] .login-mentor-copy small,
+html[data-theme="dark"] .login-disclaimer,
+html[data-theme="dark"] .login-disclaimer b { color: #eff8e8 !important; }
+html[data-theme="dark"] .login-input-wrap {
+  background: linear-gradient(145deg, rgba(5,24,9,.94), rgba(13,39,16,.90)) !important;
+  border-color: rgba(155,203,111,.38) !important;
+  box-shadow: inset 0 1px 0 rgba(232,255,214,.08), inset 0 -2px 7px rgba(0,0,0,.18) !important;
+}
+html[data-theme="dark"] .login-input-wrap input,
+html[data-theme="dark"] .login-input-wrap select { color: #f0f6e9 !important; }
+html[data-theme="dark"] .login-input-wrap input::placeholder { color: #b6c7ad !important; }
+html[data-theme="dark"] .login-tabs { background: rgba(31,62,34,.60) !important; border-color: rgba(194,225,164,.18) !important; }
+html[data-theme="dark"] .login-tab { color: #c9dcbf !important; }
+html[data-theme="dark"] .login-tab.active { color: #10210f !important; background: linear-gradient(135deg, #c4e59b, #74a94a) !important; }
+html[data-theme="dark"] .login-submit { color: #10210f !important; background: linear-gradient(135deg, #c4e59b, #74a94a) !important; }
+html[data-theme="dark"] .login-disclaimer { background: rgba(8,35,12,.62) !important; border-color: rgba(148,216,101,.23) !important; }
+
+/* Focus and motion remain accessible; no layout or interaction semantics change. */
+:where(button, input, select, textarea, a):focus-visible {
+  outline: 3px solid rgba(119, 169, 79, .38);
+  outline-offset: 2px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .app-shell .glass:not(.sidebar):hover {
+    border-color: rgba(111, 157, 73, .48) !important;
+    box-shadow: 0 19px 48px rgba(40,73,35,.16), inset 0 1px 0 rgba(255,255,255,.92), inset 0 -1px 0 rgba(89,132,62,.12) !important;
+  }
+  html[data-theme="dark"] .app-shell .glass:not(.sidebar):hover {
+    border-color: rgba(184,232,136,.52) !important;
+    box-shadow: 0 23px 58px rgba(0,0,0,.38), inset 0 1px 0 rgba(233,255,214,.22), inset 0 -1px 0 rgba(91,155,60,.30) !important;
+  }
+}
+@media (max-width: 780px) {
+  .login-topbar { border-radius: 16px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-shell .glass, .login-topbar, .login-benefit, .login-card,
+  .login-principle, .login-mentor-name { transition: none !important; }
+}
+
+/* ---------------------------------------------------------------------
+   Secondary dashboard components — the same family, quieter than parent
+   glass cards. This sweep covers the AI Admin, Mentor, Chat and workspace
+   preference details that are not themselves marked with .glass.
+   --------------------------------------------------------------------- */
+.app-shell :is(
+  .empty-state,
+  .quick-action,
+  .chat-suggestion,
+  .ai-model-state,
+  .support-signal,
+  .ai-admin-data-list > div,
+  .ai-model-metrics,
+  .support-process-step,
+  .ai-admin-review-entry,
+  .edash-priority-item,
+  .edash-insight-item,
+  .nature-gallery-note,
+  .nature-control-field,
+  .account-setup-message
+) {
+  color: #2e4b31 !important;
+  background: linear-gradient(145deg, rgba(246,252,240,.82), rgba(226,240,215,.68)) !important;
+  border: 1px solid rgba(105,149,76,.22) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.78), 0 5px 16px rgba(35,72,31,.055) !important;
+  border-radius: 13px;
+}
+html[data-theme="dark"] .app-shell :is(
+  .empty-state,
+  .quick-action,
+  .chat-suggestion,
+  .ai-model-state,
+  .support-signal,
+  .ai-admin-data-list > div,
+  .ai-model-metrics,
+  .support-process-step,
+  .ai-admin-review-entry,
+  .edash-priority-item,
+  .edash-insight-item,
+  .nature-gallery-note,
+  .nature-control-field,
+  .account-setup-message
+) {
+  color: #e8f5df !important;
+  background: linear-gradient(145deg, rgba(8,30,12,.88), rgba(20,49,23,.76)) !important;
+  border-color: rgba(139,199,93,.29) !important;
+  box-shadow: inset 0 1px 0 rgba(230,255,208,.14), 0 6px 18px rgba(0,0,0,.14) !important;
+}
+.app-shell .quick-action,
+.app-shell .chat-suggestion { text-align: left; }
+.app-shell .quick-action:hover,
+.app-shell .chat-suggestion:hover { border-color: rgba(111,157,73,.48) !important; }
+html[data-theme="dark"] .app-shell .quick-action:hover,
+html[data-theme="dark"] .app-shell .chat-suggestion:hover { border-color: rgba(184,232,136,.45) !important; }
+.app-shell .support-process-step { padding: 12px; }
+.app-shell .support-process-step.active {
+  border-color: rgba(105,157,69,.44) !important;
+  background: linear-gradient(145deg, rgba(232,245,220,.94), rgba(211,231,196,.82)) !important;
+}
+html[data-theme="dark"] .app-shell .support-process-step.active {
+  border-color: rgba(169,221,122,.44) !important;
+  background: linear-gradient(145deg, rgba(25,65,27,.88), rgba(11,39,15,.82)) !important;
+}
+
+/* Short status labels stay pill-shaped and never inherit a full card fill. */
+.app-shell :is(.model-status, .chat-prototype-pill, .support-engine-chip, .ai-admin-status, .nature-gallery-status, .edash-ai-tag) {
+  color: #527448 !important;
+  background: rgba(223,239,210,.70) !important;
+  border: 1px solid rgba(100,146,72,.20) !important;
+  border-radius: 999px !important;
+}
+html[data-theme="dark"] .app-shell :is(.model-status, .chat-prototype-pill, .support-engine-chip, .ai-admin-status, .nature-gallery-status, .edash-ai-tag) {
+  color: #d5eac6 !important;
+  background: rgba(17,49,20,.68) !important;
+  border-color: rgba(144,198,101,.24) !important;
+}
+.app-shell .support-auto-run-status {
+  color: #42613d !important;
+  background: linear-gradient(145deg, rgba(239,248,230,.88), rgba(222,239,211,.76)) !important;
+  border: 1px solid rgba(105,149,76,.22) !important;
+  border-radius: 12px;
+}
+html[data-theme="dark"] .app-shell .support-auto-run-status {
+  color: #e1f0d7 !important;
+  background: linear-gradient(145deg, rgba(6,29,10,.90), rgba(16,47,20,.82)) !important;
+  border-color: rgba(144,198,101,.24) !important;
+}
+.app-shell .ai-admin-footnote,
+.app-shell .support-data-caveat,
+.app-shell .chat-privacy-note,
+.app-shell .support-privacy-note,
+.app-shell .nature-gallery-note {
+  color: #637960 !important;
+}
+html[data-theme="dark"] .app-shell .ai-admin-footnote,
+html[data-theme="dark"] .app-shell .support-data-caveat,
+html[data-theme="dark"] .app-shell .chat-privacy-note,
+html[data-theme="dark"] .app-shell .support-privacy-note,
+html[data-theme="dark"] .app-shell .nature-gallery-note {
+  color: #bfd2b3 !important;
+}
+.app-shell .ai-admin-data-list > div { border-radius: 10px; }
+.app-shell .empty-state { overflow-wrap: anywhere; }
+
+/* Nested account/profile controls and the appearance scene picker. */
+.app-shell .nature-control-field select,
+.app-shell .nature-control-field input,
+.app-shell .glass-meter-row input[type="range"] { accent-color: #6f9f43; }
+.app-shell .nature-gallery-toggle-row { border-radius: 12px; }
+html[data-theme="dark"] .app-shell .nature-gallery-toggle-row { border-color: rgba(144,198,101,.22); }
+.app-shell .modal-heading h2 { color: #203b25; }
+html[data-theme="dark"] .app-shell .modal-heading h2 { color: #f1f9e9; }
+.app-shell .detail-section { border-bottom-color: rgba(88,132,63,.18); }
+html[data-theme="dark"] .app-shell .detail-section { border-bottom-color: rgba(163,211,119,.16); }
+
+/* Modal veil and toast layer match both theme states without muting content. */
+.app-shell .modal-backdrop { background: rgba(10,24,12,.42); }
+html[data-theme="dark"] .app-shell .modal-backdrop { background: rgba(0,8,2,.62); }
+.app-shell .toast {
+  color: #28442c;
+  background: rgba(244,250,238,.96);
+  border-color: rgba(108,151,79,.28);
+}
+html[data-theme="dark"] .app-shell .toast {
+  color: #eaf5e2;
+  background: rgba(9,31,13,.96);
+  border-color: rgba(150,202,105,.30);
+}
+
+/* Dynamic records rendered by app.js are included in the same visual audit. */
+.app-shell :is(
+  .ai-admin-review-entry,
+  .ai-admin-activity-item,
+  .ai-admin-value,
+  .ai-model-metrics-grid > div,
+  .edash-insight,
+  .edash-priority-item,
+  .fairness-group:not(.head),
+  .feedback-entry,
+  .support-stat,
+  .support-trend-item,
+  .support-recommendation,
+  .support-followup-item,
+  .support-gap-item,
+  .support-resource-item,
+  .support-target-item,
+  .support-empty-hint
+) {
+  color: #2e4b31 !important;
+  background: linear-gradient(145deg, rgba(246,252,240,.84), rgba(226,240,215,.72)) !important;
+  border-color: rgba(105,149,76,.22) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.78), 0 5px 16px rgba(35,72,31,.055) !important;
+}
+html[data-theme="dark"] .app-shell :is(
+  .ai-admin-review-entry,
+  .ai-admin-activity-item,
+  .ai-admin-value,
+  .ai-model-metrics-grid > div,
+  .edash-insight,
+  .edash-priority-item,
+  .fairness-group:not(.head),
+  .feedback-entry,
+  .support-stat,
+  .support-trend-item,
+  .support-recommendation,
+  .support-followup-item,
+  .support-gap-item,
+  .support-resource-item,
+  .support-target-item,
+  .support-empty-hint
+) {
+  color: #e8f5df !important;
+  background: linear-gradient(145deg, rgba(8,30,12,.88), rgba(20,49,23,.76)) !important;
+  border-color: rgba(139,199,93,.25) !important;
+  box-shadow: inset 0 1px 0 rgba(230,255,208,.12), 0 6px 18px rgba(0,0,0,.14) !important;
+}
+.app-shell .fairness-group.head {
+  color: #36583a !important;
+  background: rgba(218,235,205,.68) !important;
+  border-color: rgba(86,130,62,.20) !important;
+}
+html[data-theme="dark"] .app-shell .fairness-group.head {
+  color: #eff8e8 !important;
+  background: rgba(52,91,42,.48) !important;
+  border-color: rgba(173,220,131,.18) !important;
+}
+.app-shell .feedback-entry-head { color: inherit; }
+.app-shell .support-explain-row { border-bottom-color: rgba(91,132,67,.15) !important; }
+html[data-theme="dark"] .app-shell .support-explain-row { border-bottom-color: rgba(163,211,119,.16) !important; }
+.app-shell .support-choice-button,
+.app-shell .row-action {
+  color: #4d783d !important;
+  background: rgba(224,239,213,.52) !important;
+  border: 1px solid rgba(100,146,72,.24) !important;
+  border-radius: 9px !important;
+}
+html[data-theme="dark"] .app-shell .support-choice-button,
+html[data-theme="dark"] .app-shell .row-action {
+  color: #c9e6a8 !important;
+  background: rgba(21,54,23,.58) !important;
+  border-color: rgba(144,198,101,.28) !important;
+}
+.app-shell .tag {
+  color: #365b37 !important;
+  background: rgba(183,214,155,.42) !important;
+  border: 1px solid rgba(76,128,57,.22) !important;
+}
+html[data-theme="dark"] .app-shell .tag {
+  color: #e0f2d1 !important;
+  background: rgba(76,123,53,.30) !important;
+  border-color: rgba(164,215,119,.24) !important;
+}
+.app-shell .band { border: 1px solid currentColor; }
+.app-shell .action-note {
+  color: #42613d !important;
+  background: rgba(222,239,211,.62) !important;
+  border-left: 3px solid #79a94f;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+html[data-theme="dark"] .app-shell .action-note {
+  color: #dcebd2 !important;
+  background: rgba(17,47,20,.65) !important;
+  border-left-color: #a6d76d;
+}
+.app-shell .chat-message.assistant > div {
+  background: linear-gradient(145deg, rgba(246,252,240,.86), rgba(226,240,215,.76)) !important;
+  border-color: rgba(105,149,76,.22) !important;
+}
+.app-shell .chat-message.user > div {
+  background: rgba(219,237,205,.66) !important;
+  border-color: rgba(100,146,72,.20) !important;
+}
+html[data-theme="dark"] .app-shell .chat-message.assistant > div {
+  background: linear-gradient(145deg, rgba(8,30,12,.90), rgba(20,49,23,.82)) !important;
+  border-color: rgba(139,199,93,.24) !important;
+}
+html[data-theme="dark"] .app-shell .chat-message.user > div {
+  background: rgba(35,78,30,.48) !important;
+  border-color: rgba(144,198,101,.24) !important;
+}
+
+.app-shell .glass { color: var(--text) !important; }
+.app-shell .glass p,
+.app-shell .glass small,
+.app-shell .glass label { color: var(--muted) !important; }
+html[data-theme="light"] .app-shell .glass :is(h1,h2,h3,h4,strong,b),
+html:not([data-theme="dark"]) .app-shell .glass :is(h1,h2,h3,h4,strong,b) { color: #203b25 !important; }
+html[data-theme="dark"] .app-shell .glass :is(h1,h2,h3,h4,strong,b) { color: #f1f9e9 !important; }
+html[data-theme="dark"] .app-shell .glass p,
+html[data-theme="dark"] .app-shell .glass small,
+html[data-theme="dark"] .app-shell .glass label { color: #c5d8b9 !important; }
+
+/* Premium liquid-glass + restrained natural moss finish (global visual polish) */
+:root {
+  --premium-glass-blur: 26px;
+  --premium-radius: 20px;
+  --premium-moss-rim: rgba(105, 145, 70, .22);
+  --premium-glass-highlight: rgba(255,255,255,.82);
+}
+html[data-theme="light"], html:not([data-theme="dark"]) {
+  --premium-glass-highlight: rgba(255,255,255,.88);
+  --premium-moss-rim: rgba(106,145,68,.20);
+}
+html[data-theme="dark"] {
+  --premium-glass-highlight: rgba(220,255,204,.20);
+  --premium-moss-rim: rgba(137,196,88,.30);
+}
+/* Keep moss as a natural edge accent, not a noisy full-face overlay. */
+.app-shell .glass::before { opacity: .055 !important; }
+html[data-theme="dark"] .app-shell .glass::before { opacity: .095 !important; }
+.app-shell .glass::after {
+  opacity: .42 !important;
+  background-image:
+    url("assets/moss-panel-frame.png"),
+    linear-gradient(145deg, rgba(255,255,255,.28), transparent 18%, transparent 78%, rgba(117,167,73,.10)) !important;
+}
+html[data-theme="dark"] .app-shell .glass::after { opacity: .52 !important; }
+.app-shell :is(.glass, .panel, .stat-card, .edash-kpi, .edash-panel, .login-card, .login-benefit, .login-principle, .login-tabs, .login-form) {
+  border-radius: var(--premium-radius);
+  -webkit-backdrop-filter: blur(var(--premium-glass-blur)) saturate(155%);
+  backdrop-filter: blur(var(--premium-glass-blur)) saturate(155%);
+}
+/* Login page uses the same material language without changing its structure. */
+.login-page :is(.login-card, .login-benefit, .login-principle, .login-tabs, .login-form) {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid rgba(255,255,255,.72) !important;
+  background: linear-gradient(145deg, rgba(250,254,246,.78), rgba(224,239,214,.56)) !important;
+  box-shadow: 0 18px 48px rgba(32,65,29,.12), inset 0 1px 0 rgba(255,255,255,.86) !important;
+  -webkit-backdrop-filter: blur(25px) saturate(155%);
+  backdrop-filter: blur(25px) saturate(155%);
+}
+.login-page :is(.login-card, .login-benefit, .login-principle)::after {
+  content: ""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+  background: url("assets/moss-panel-frame.png") center / 100% 100% no-repeat;
+  opacity:.28;
+}
+html[data-theme="dark"] .login-page :is(.login-card, .login-benefit, .login-principle, .login-tabs, .login-form) {
+  border-color: rgba(164,211,119,.28) !important;
+  background: linear-gradient(145deg, rgba(5,25,9,.84), rgba(15,43,18,.72)) !important;
+  box-shadow: 0 20px 52px rgba(0,0,0,.28), inset 0 1px 0 rgba(228,255,210,.16) !important;
+}
+html[data-theme="dark"] .login-page :is(.login-card, .login-benefit, .login-principle)::after { opacity:.38; }
+/* Professional border definition for data tables and nested surfaces. */
+.app-shell .table-wrap { border: 1px solid var(--premium-moss-rim); border-radius: 16px; overflow: hidden; background: rgba(255,255,255,.16); }
+html[data-theme="dark"] .app-shell .table-wrap { background: rgba(2,16,6,.22); }
+.app-shell table thead { background: rgba(157,190,126,.18); }
+html[data-theme="dark"] .app-shell table thead { background: rgba(115,166,75,.16); }
+.app-shell table tbody tr { border-bottom: 1px solid rgba(91,130,69,.12); }
+html[data-theme="dark"] .app-shell table tbody tr { border-bottom-color: rgba(154,202,112,.13); }
+/* Inputs stay legible and calm; no moss texture beneath text fields. */
+.app-shell :is(input, select, textarea), .login-page :is(input, select, textarea) {
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  border: 1px solid var(--premium-moss-rim) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.30);
+}
+
+
+/* =====================================================================
+   TEXT VISIBILITY / CONTRAST PATCH
+   Keeps moss textures and glass effects behind the content layer.
+   This layer intentionally prioritizes readable text over decorative glass.
+   ===================================================================== */
+.app-shell .glass,
+.app-shell .glass :where(h1,h2,h3,h4,h5,h6,p,li,dt,dd,td,th,label,
+  legend,summary,figcaption,caption,blockquote, .section-title, .panel-title,
+  .card-title, .metric-label, .table-empty, .empty-state, .helper-text,
+  .description, .subtitle, .meta, .student-name, .mentor-name, .nav-label),
+.login-page :where(h1,h2,h3,h4,h5,h6,p,li,label,legend,.login-title,
+  .login-subtitle,.login-benefit,.login-principle,.login-mentor-name) {
+  color: var(--text, #213323) !important;
+  text-shadow: none !important;
+  opacity: 1 !important;
+}
+
+/* Muted copy must remain readable (avoid washed-out translucent gray). */
+.app-shell .glass :where(.muted,.text-muted,.secondary-text,.subtext,.hint,
+  .helper-text,.description,.subtitle,.meta,.timestamp,.small-text),
+.login-page :where(.muted,.text-muted,.secondary-text,.subtext,.hint) {
+  color: var(--muted, #637960) !important;
+  opacity: 1 !important;
+}
+html[data-theme="dark"] .app-shell .glass :where(.muted,.text-muted,
+  .secondary-text,.subtext,.hint,.helper-text,.description,.subtitle,.meta,
+  .timestamp,.small-text),
+html[data-theme="dark"] .login-page :where(.muted,.text-muted,
+  .secondary-text,.subtext,.hint) {
+  color: #c4d5bb !important;
+}
+
+/* Text inside table cells, including nested links and labels. */
+.app-shell .glass table,
+.app-shell .glass table :where(th,td,tr,caption),
+.app-shell .glass .table-wrap,
+.app-shell .glass .table-wrap :where(th,td,a,span,strong) {
+  color: var(--text, #213323) !important;
+}
+html[data-theme="dark"] .app-shell .glass table,
+html[data-theme="dark"] .app-shell .glass table :where(th,td,tr,caption),
+html[data-theme="dark"] .app-shell .glass .table-wrap,
+html[data-theme="dark"] .app-shell .glass .table-wrap :where(th,td,a,span,strong) {
+  color: #f0f6e9 !important;
+}
+
+/* Inputs, select menus, and editable text retain strong foreground contrast. */
+.app-shell :where(input,select,textarea),
+.login-page :where(input,select,textarea) {
+  color: var(--moss-control-text, var(--text, #213323)) !important;
+  -webkit-text-fill-color: var(--moss-control-text, var(--text, #213323)) !important;
+  background-color: var(--moss-control, rgba(247,251,242,.94)) !important;
+  opacity: 1 !important;
+}
+html[data-theme="dark"] .app-shell :where(input,select,textarea),
+html[data-theme="dark"] .login-page :where(input,select,textarea) {
+  color: #f0f6e9 !important;
+  -webkit-text-fill-color: #f0f6e9 !important;
+  background-color: rgba(7,22,10,.96) !important;
+}
+.app-shell :where(input,textarea)::placeholder,
+.login-page :where(input,textarea)::placeholder {
+  color: #647960 !important;
+  -webkit-text-fill-color: #647960 !important;
+  opacity: 1 !important;
+}
+html[data-theme="dark"] .app-shell :where(input,textarea)::placeholder,
+html[data-theme="dark"] .login-page :where(input,textarea)::placeholder {
+  color: #b6c7ad !important;
+  -webkit-text-fill-color: #b6c7ad !important;
+}
+
+/* Links remain distinguishable without being neon. */
+.app-shell .glass a:not(.btn):not(.button),
+.login-page a:not(.btn):not(.button) {
+  color: var(--primary2, #2d5b35) !important;
+  text-decoration-thickness: .08em;
+}
+html[data-theme="dark"] .app-shell .glass a:not(.btn):not(.button),
+html[data-theme="dark"] .login-page a:not(.btn):not(.button) {
+  color: #c7e99a !important;
+}
+
+/* Keep semantic action/status colors intact while preventing low-opacity text. */
+.app-shell .glass :where(button,.btn,.button,[role="button"],.badge,.chip,
+  .status,.risk-badge,.tag,.pill,.nav-link,.sidebar a),
+.login-page :where(button,.btn,.button,[role="button"],.badge,.chip,.tag,.pill) {
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+.app-shell .glass :where(.btn,.button,button,[role="button"]) :where(span,strong,i),
+.login-page :where(.btn,.button,button,[role="button"]) :where(span,strong,i) {
+  color: inherit !important;
+}
+
+/* Ensure the decorative texture/frame pseudo-elements never cover content. */
+.app-shell .glass::before,
+.app-shell .glass::after,
+.login-page :where(.login-card,.login-benefit,.login-principle)::after {
+  pointer-events: none !important;
+}
+.app-shell .glass > *,
+.app-shell .glass table,
+.app-shell .glass .table-wrap,
+.app-shell .glass .card-content,
+.app-shell .glass .panel-content {
+  position: relative;
+  z-index: 2;
+}
